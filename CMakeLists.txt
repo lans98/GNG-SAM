@@ -7,7 +7,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include_directories(src/include)
 
 # Source
-set(SOURCES main.cpp)
+set(SOURCES src/main.cpp)
 
 # Executables
 add_executable(gng_sam ${SOURCES})
