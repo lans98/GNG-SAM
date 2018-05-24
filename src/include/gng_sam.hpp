@@ -22,6 +22,7 @@ namespace gng {
   private:
     // Related abstractions
     struct Node {
+      double        error;
       PointN<N>     point;
       vector<Node*> relatives;
     };
@@ -48,8 +49,8 @@ namespace gng {
       nodes[0]->relatives.push_back(nodes[1]);
       nodes[1]->relatives.push_back(nodes[0]);
 
-      while (nodes < desired_netsize) {
-        double signal = gen_random_signal();
+      while (nodes.size() < desired_netsize) {
+        PointN<N> signal = gen_random_signal();
 
       }
     }
@@ -57,8 +58,8 @@ namespace gng {
 
   private:
 
-    double gen_random_signal() {
-      return random::random_in(MIN_DOUBLE, MAX_DOUBLE);
+    PointN<N> gen_random_signal() {
+      return PointN<N>::random_in(MIN_DOUBLE, MAX_DOUBLE);
     }
 
   };
