@@ -39,11 +39,12 @@ namespace gng {
       double     error   = 0.0;
       PointN<N>  point;
       unordered_set<Node*> relatives;
+      unordered_set<Edge*> relative_edges;
     };
 
     // Private fields
     set<Node*>   nodes;
-    vector<Edge> edges;
+    vector<Edge*> edges;
     Age          maximum_age;
 
   public:
@@ -73,11 +74,14 @@ namespace gng {
         auto nearest = two_nearest_nodes(signal);
         auto u = nearest.first;
         auto v = nearest.second;
+        
+        // increase age of all edges (from kdevelop)
+        //for (auto& edge: edges)
+        //  if (edge.a == u || edge.b == u) 
+        //    edge.age += 1;
 
-        // increase age of all edges
-        for (auto& edge: edges)
-          if (edge.a == u || edge.b == u) 
-            edge.age += 1;
+        for (auto& n : u->relative_edges)
+          n->age += 1;
 
         u->error += pow(u->point.norma2() - signal.point.norma2(), 2);
         // TODO: u->point +=...
@@ -85,9 +89,12 @@ namespace gng {
 
         // If there isn't a edge between u and v, create one
         if (u->relatives.find(v) == u->relatives.end()) {
+          Edge* e = new Edge{ .age = 0, .node_a = u, .node_b = v };
           u->relatives.insert(v);
           v->relatives.insert(u);
-          edges.insert(Edge{ .age = 0, .node_a = u, .node_b = v });
+          u->relativeEdges.insert(e);
+          v->relativeEdges.insert(e);
+          edges.push_back(e);
         }
 
         // TODO: set age of edge (u <-> v) to 0
@@ -137,9 +144,37 @@ namespace gng {
       return PointN<N>::random_in(MIN_DOUBLE, MAX_DOUBLE);
     }
 
-    // TODO: implement
+    double euclidian_distance(const PointN<N>& a, const PointN<N>& b){
+      double distance = 0;
+      for(int i = 0; i < N; i++)
+        distance += pow(a[i]-b[i]);
+      return sqrt(distance);
+    }
+
     pair<Node*, Node*> two_nearest_nodes(const PointN<N>& point) {
-      return {nullptr, nullptr};
+      Node* a, b;
+      double distancea = -1, distanceb = -1;
+      
+      for (auto& n : this.nodes){
+        if (distancea == -1) {
+          distancea = euclidian_distance(n->point, point);
+          a = n;
+        } else if (distanceb == -1) {
+          distanceb = euclidian_distance(n->point, point);
+          b = n;
+        } else{
+          double d = euclidian_distance(n->point, point);
+          if (d < distancea) {
+            distancea = d;
+            a = n;
+          } else if(d < distanceb) {
+            distanceb = d;
+            b = n;
+          }
+        }
+      }
+      
+      return make_pair(a, b);
     }
 
     // TODO: implement
