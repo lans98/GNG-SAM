@@ -98,8 +98,8 @@ namespace gng {
         for (auto it = edges.begin(); it != edges.end(); ++it) {
           Edge& edge = *(*it); // just an alias
 
-          Node* a = edge.a;
-          Node* b = edge.b;
+          Node* a = edge.node_a;
+          Node* b = edge.node_b;
 
           // check if edge is young enough
           if (edge.age <= maximum_age)
