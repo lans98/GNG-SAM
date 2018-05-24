@@ -84,6 +84,7 @@ namespace gng {
 
         // If there isn't a edge between u and v, create one
         if (v->relatives.find(u) == v->relatives.end()) {
+          Edge* e = new Edge { .age = 0, .node_a = u, .node_b = v };
           u->relatives.insert(v);
           v->relatives.insert(u);
           u->relative_edges.insert(e);
