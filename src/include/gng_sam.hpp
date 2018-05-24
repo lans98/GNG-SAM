@@ -76,7 +76,8 @@ namespace gng {
 
         // increase age of all edges
         for (auto& edge: edges)
-          edge.age += 1;
+          if (edge.a == u || edge.b == u) 
+            edge.age += 1;
 
         u->error += pow(u->point.norma2() - signal.point.norma2(), 2);
         // TODO: u->point +=...
