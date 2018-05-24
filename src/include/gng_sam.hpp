@@ -16,7 +16,7 @@
 namespace gng {
 
   using namespace std;
-  using namespace gng::point;
+  using namespace point;
 
   using Age = unsigned long;
 
