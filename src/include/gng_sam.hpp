@@ -39,11 +39,12 @@ namespace gng {
       double     error   = 0.0;
       PointN<N>  point;
       unordered_set<Node*> relatives;
+      unordered_set<Edge*> relative_edges;
     };
 
     // Private fields
     set<Node*>   nodes;
-    vector<Edge> edges;
+    vector<Edge*> edges;
     Age          maximum_age;
 
   public:
@@ -54,7 +55,7 @@ namespace gng {
     Age  get_maximum_edge_age() { return maximum_age; }
 
     // stop criterion, net size
-    void start(size_t desired_netsize) {
+    void start(size_t desired_netsize, unsigned no_steps) {
       Node* tmp_node;
 
       tmp_node = new Node();
@@ -65,14 +66,22 @@ namespace gng {
       tmp_node->point = PointN<N>::random_in(MIN_DOUBLE, MAX_DOUBLE);
       nodes.insert(tmp_node);
 
+      unsigned step_counter = 0;
+      unsigned cycle_counter = 0;
       while (nodes.size() < desired_netsize) {
+        step_counter += 1;
         PointN<N> signal = gen_random_signal();
         auto nearest = two_nearest_nodes(signal);
         auto u = nearest.first;
         auto v = nearest.second;
+        
+        // increase age of all edges (from kdevelop)
+        //for (auto& edge: edges)
+        //  if (edge.a == u || edge.b == u) 
+        //    edge.age += 1;
 
-        for (auto& n : u->relatives)
-          n.age += 1;
+        for (auto& n : u->relative_edges)
+          n->age += 1;
 
         u->error += pow(u->point.norma2() - signal.point.norma2(), 2);
         // TODO: u->point +=...
@@ -80,12 +89,52 @@ namespace gng {
 
         // If there isn't a edge between u and v, create one
         if (u->relatives.find(v) == u->relatives.end()) {
+          Edge* e = new Edge{ .age = 0, .node_a = u, .node_b = v };
           u->relatives.insert(v);
           v->relatives.insert(u);
-          edges.insert(Edge{ .age = 0, .node_a = u, .node_b = v });
+          u->relativeEdges.insert(e);
+          v->relativeEdges.insert(e);
+          edges.push_back(e);
         }
 
-        update_edges();
+        // TODO: set age of edge (u <-> v) to 0
+
+        // remove oldest edges
+        for (auto it = edges.begin(); it != edges.end(); ++it) {
+          Edge& edge = *it; // just an alias
+
+          Node* a = edge.a;
+          Node* b = edge.b;
+
+          // check if edge is young enough
+          if (edge.age <= maximum_age)
+            continue;
+
+          // delete this edge because it's too old
+          edges.erase(it);
+
+          // we deleted its last edge
+          if (a->relatives.size() == 1) {
+            auto a_it = nodes.find(a);
+            nodes.erase(a_it);
+            delete a;
+          }
+
+          // we deleted its last edge
+          if (b->relatives.size() == 1) {
+            auto b_it = nodes.find(b);
+            nodes.erase(b_it);
+            delete b;
+          }
+        }
+
+        if (step_counter == no_steps) {
+          create_new_node();
+          step_counter = 0;
+          cycle_counter += 1;
+        }
+
+        // TODO: decrease all error by some 'beta' constant
       }
     }
 
@@ -95,20 +144,42 @@ namespace gng {
       return PointN<N>::random_in(MIN_DOUBLE, MAX_DOUBLE);
     }
 
-    /*
+    double euclidian_distance(const PointN<N>& a, const PointN<N>& b){
+      double distance = 0;
+      for(int i = 0; i < N; i++)
+        distance += pow(a[i]-b[i]);
+      return sqrt(distance);
+    }
+
     pair<Node*, Node*> two_nearest_nodes(const PointN<N>& point) {
-
+      Node* a, b;
+      double distancea = -1, distanceb = -1;
+      
+      for (auto& n : this.nodes){
+        if (distancea == -1) {
+          distancea = euclidian_distance(n->point, point);
+          a = n;
+        } else if (distanceb == -1) {
+          distanceb = euclidian_distance(n->point, point);
+          b = n;
+        } else{
+          double d = euclidian_distance(n->point, point);
+          if (d < distancea) {
+            distancea = d;
+            a = n;
+          } else if(d < distanceb) {
+            distanceb = d;
+            b = n;
+          }
+        }
+      }
+      
+      return make_pair(a, b);
     }
-    */
 
-    void update_edges() {
+    // TODO: implement
+    void create_new_node() {
 
-
-    }
-
-    void reset_visited_marks() {
-      for (auto& n : nodes)
-        n->visited = false;
     }
   };
 
