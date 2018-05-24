@@ -28,7 +28,7 @@ namespace gng {
 
     struct Edge {
       Age   age;
-      Node* rela;
+      Node* relative;
     };
 
     struct Node {
@@ -56,15 +56,20 @@ namespace gng {
       tmp_node->point = PointN<N>::random_in(MIN_DOUBLE, MAX_DOUBLE);
       nodes.push_back(tmp_node);
 
-      nodes[0]->relatives.push_back(Edge { .age = 0, .rela = nodes[1] });
-      nodes[1]->relatives.push_back(Edge { .age = 0, .rela = nodes[0] });
+      nodes[0]->relatives.push_back(Edge { .age = 0, .relative = nodes[1] });
+      nodes[1]->relatives.push_back(Edge { .age = 0, .relative = nodes[0] });
 
       while (nodes.size() < desired_netsize) {
         PointN<N> signal = gen_random_signal();
-        auto [v, u] = two_nearest_nodes(signal);
+        auto nearest = two_nearest_nodes(signal);
+        auto u = nearest.first;
+        auto v = nearest.second;
 
-        for (auto& n : v.relatives)
+        for (auto& n : u->relatives)
           n.age += 1;
+
+        u->error += pow(u->point.norma2() - signal.point.norma2(), 2);
+        // u->point +=
       }
     }
 
@@ -77,7 +82,6 @@ namespace gng {
     pair<Node*, Node*> two_nearest_nodes(const PointN<N>& point) {
 
     }
-
   };
 
 }
