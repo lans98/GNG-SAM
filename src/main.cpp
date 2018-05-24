@@ -1,6 +1,10 @@
+#include <memory>
 #include <gng_sam.hpp>
 
+using namespace std;
+using namespace gng;
+
 int main() {
-	gng::GNG<2>* GrowingNeuralGas = new gng::GNG<2>();
-	GrowingNeuralGas->start(10);
+  auto growing_neural_gas = make_unique<GNG<2>>();
+  growing_neural_gas->start(10, 5);
 }
