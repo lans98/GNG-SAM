@@ -39,11 +39,12 @@ namespace gng {
       double     error   = 0.0;
       PointN<N>  point;
       unordered_set<Node*> relatives;
+      unordered_set<Edge*> relativeEdges;
     };
 
     // Private fields
     set<Node*>   nodes;
-    vector<Edge> edges;
+    vector<Edge*> edges;
     Age          maximum_age;
 
   public:
@@ -71,8 +72,8 @@ namespace gng {
         auto u = nearest.first;
         auto v = nearest.second;
 
-        for (auto& n : u->relatives)
-          n.age += 1;
+        for (auto& n : u->relativeEdges)
+          n->age += 1;
 
         u->error += pow(u->point.norma2() - signal.point.norma2(), 2);
         // TODO: u->point +=...
@@ -82,10 +83,14 @@ namespace gng {
         if (u->relatives.find(v) == u->relatives.end()) {
           u->relatives.insert(v);
           v->relatives.insert(u);
-          edges.insert(Edge{ .age = 0, .node_a = u, .node_b = v });
+          Edge* e = new Edge;
+          *e = {.age = 0, .node_a = u, .node_b = v};
+          (this->edges).push_back(e);
+          u->relativeEdges.insert(e);
+          v->relativeEdges.insert(e);
         }
 
-        update_edges();
+        //update_edges();
       }
     }
 
@@ -95,11 +100,39 @@ namespace gng {
       return PointN<N>::random_in(MIN_DOUBLE, MAX_DOUBLE);
     }
 
-    /*
-    pair<Node*, Node*> two_nearest_nodes(const PointN<N>& point) {
-
+    double euclidianDistance(array<double, N> & a, array<double, N> & b){
+      double distance = 0;
+      for(int i = 0; i < a.get_dimension(); i++)
+        distance += pow(a[i]-b[i]);
+      return sqrt(distance);
     }
-    */
+
+    pair<Node*, Node*> two_nearest_nodes(const PointN<N>& point) {
+      Node* a, b;
+      double distancea = -1, distanceb = -1;
+      for (auto& n : this.nodes){
+        if(distancea == -1) {
+          distancea = euclidianDistance((n->point).position, point.position);
+          a = n;
+        }
+        else if(distanceb == -1) {
+          distanceb = euclidianDistance((n->point).position, point.position);
+          b = n;
+        }
+        else{
+          double d = euclidianDistance((n->point).position, point.position);
+          if( d < distancea ){
+            distancea = d;
+            a = n;
+          }
+          else if( d < distanceb ){
+            distanceb = d;
+            b = n;
+          }
+        }
+      }
+      return make_pair(a, b);
+    }
 
     void update_edges() {
 
