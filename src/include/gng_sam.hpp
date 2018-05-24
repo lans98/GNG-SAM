@@ -129,7 +129,9 @@ namespace gng {
           cycle_counter += 1;
         }
 
-        // TODO: decrease all error by some 'beta' constant
+        // decrease all error by some 'beta' constant
+        for (auto& node : nodes)
+          node.error += beta * node.error;
       }
     }
 
