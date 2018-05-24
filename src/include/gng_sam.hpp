@@ -3,9 +3,11 @@
 
 // Std dependencies
 #include <set>
+#include <queue>
 #include <utility>
 #include <vector>
 #include <numeric>
+#include <unordered_set>
 
 // Crate dependencies
 #include <point.hpp>
@@ -28,23 +30,21 @@ namespace gng {
     struct Node;
 
     struct Edge {
-      Age   age;
-      Node* relative;
-
-      bool operator<(const Edge& r) { return relative < r.relative; }
-      bool operator>(const Edge& r) { return relative > r.relative; }
-      bool operator==(const Edge& r) { return relative == r.relative; }
+      Age   age = 0;
+      Node* node_a;
+      Node* node_b;
     };
 
     struct Node {
-      double     error;
+      double     error   = 0.0;
       PointN<N>  point;
-      set<Edge>  relatives;
+      unordered_set<Node*> relatives;
     };
 
     // Private fields
-    vector<Node*> nodes; // the net
-    Age           maximum_age;
+    set<Node*>   nodes;
+    vector<Edge> edges;
+    Age          maximum_age;
 
   public:
     GNG() = default;
@@ -59,11 +59,11 @@ namespace gng {
 
       tmp_node = new Node();
       tmp_node->point = PointN<N>::random_in(MIN_DOUBLE, MAX_DOUBLE);
-      nodes.push_back(tmp_node);
+      nodes.insert(tmp_node);
 
       tmp_node = new Node();
       tmp_node->point = PointN<N>::random_in(MIN_DOUBLE, MAX_DOUBLE);
-      nodes.push_back(tmp_node);
+      nodes.insert(tmp_node);
 
       while (nodes.size() < desired_netsize) {
         PointN<N> signal = gen_random_signal();
@@ -75,15 +75,17 @@ namespace gng {
           n.age += 1;
 
         u->error += pow(u->point.norma2() - signal.point.norma2(), 2);
-        // u->point +=
+        // TODO: u->point +=...
+        // TODO: foreach ...
 
         // If there isn't a edge between u and v, create one
         if (u->relatives.find(v) == u->relatives.end()) {
-          u->relatives.insert(Edge { .age = 0, .relative = v });
-          v->relatives.insert(Edge { .age = 0, .relative = u });
+          u->relatives.insert(v);
+          v->relatives.insert(u);
+          edges.insert(Edge{ .age = 0, .node_a = u, .node_b = v });
         }
 
-
+        update_edges();
       }
     }
 
@@ -98,6 +100,16 @@ namespace gng {
 
     }
     */
+
+    void update_edges() {
+
+
+    }
+
+    void reset_visited_marks() {
+      for (auto& n : nodes)
+        n->visited = false;
+    }
   };
 
 }
