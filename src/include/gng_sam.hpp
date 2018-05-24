@@ -71,8 +71,8 @@ namespace gng {
         auto u = nearest.first;
         auto v = nearest.second;
 
-        for (auto& n : u->relatives)
-          n.age += 1;
+        for (auto& edge: edges)
+          edge.age += 1;
 
         u->error += pow(u->point.norma2() - signal.point.norma2(), 2);
         // TODO: u->point +=...
@@ -85,7 +85,33 @@ namespace gng {
           edges.insert(Edge{ .age = 0, .node_a = u, .node_b = v });
         }
 
-        update_edges();
+        // TODO: edge(u,v).age = 0
+
+        // remove oldest edges
+        for (auto it = edges.begin(); it != edges.end(); ++it) {
+          Edge& edge = *it; // just an alias
+
+          Node* a = edge.a;
+          Node* b = edge.b;
+
+          if (edge.age > maximum_age) {
+            edges.erase(it);
+            
+            // we deleted its last edge
+            if (a->relatives.size() == 1) {
+              auto a_it = nodes.find(a);
+              nodes.erase(a_it);
+              delete a;
+            }
+
+            // we deleted its last edge
+            if (b->relatives.size() == 1) {
+              auto b_it = nodes.find(b);
+              nodes.erase(b_it);
+              delete b;
+            }
+          }
+        }
       }
     }
 
@@ -100,11 +126,6 @@ namespace gng {
 
     }
     */
-
-    void update_edges() {
-
-
-    }
   };
 
 }
