@@ -44,10 +44,14 @@ namespace gng {
 
     // Private fields
     vector<Node*> nodes; // the net
+    Age           maximum_age;
 
   public:
     GNG() = default;
     GNG(const GNG&) = delete;
+
+    void set_maximum_edge_age(Age new_age) { maximum_age = new_age; }
+    Age  get_maximum_edge_age() { return maximum_age; }
 
     // stop criterion, net size
     void start(size_t desired_netsize) {
@@ -72,6 +76,12 @@ namespace gng {
 
         u->error += pow(u->point.norma2() - signal.point.norma2(), 2);
         // u->point +=
+
+        // If there isn't a edge between u and v, create one
+        if (u->relatives.find(v) == u->relatives.end()) {
+          u->relatives.insert(Edge { .age = 0, .relative = v });
+          v->relatives.insert(Edge { .age = 0, .relative = u });
+        }
 
 
       }
