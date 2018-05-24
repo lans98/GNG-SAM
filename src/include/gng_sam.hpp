@@ -55,7 +55,7 @@ namespace gng {
       }
     }
 //nose que weas
-
+//lol
   private:
 
     PointN<N> gen_random_signal() {
