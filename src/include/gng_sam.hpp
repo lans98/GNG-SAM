@@ -92,8 +92,8 @@ namespace gng {
           Edge* e = new Edge{ .age = 0, .node_a = u, .node_b = v };
           u->relatives.insert(v);
           v->relatives.insert(u);
-          u->relativeEdges.insert(e);
-          v->relativeEdges.insert(e);
+          u->relative_edges.insert(e);
+          v->relative_edges.insert(e);
           edges.push_back(e);
         }
 
@@ -101,7 +101,7 @@ namespace gng {
 
         // remove oldest edges
         for (auto it = edges.begin(); it != edges.end(); ++it) {
-          Edge& edge = *it; // just an alias
+          Edge& edge = *(*it); // just an alias
 
           Node* a = edge.a;
           Node* b = edge.b;
@@ -146,8 +146,8 @@ namespace gng {
 
     double euclidian_distance(const PointN<N>& a, const PointN<N>& b){
       double distance = 0;
-      for(int i = 0; i < N; i++)
-        distance += pow(a[i]-b[i]);
+      for(size_t i = 0; i < N; i++)
+        distance += pow(a[i] - b[i]);
       return sqrt(distance);
     }
 
