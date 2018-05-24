@@ -146,9 +146,9 @@ namespace gng {
       return sqrt(distance);
     }
 
-    auto two_nearest_nodes(PointN<N>& point) {
-      Node* a = new Node();
-      Node* b = new Node();
+    auto two_nearest_nodes(const PointN<N>& point) {
+      Node* a;
+      Node* b;
       double distancea = -1, distanceb = -1;
 
       for (auto& n : nodes){
