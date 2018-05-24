@@ -54,7 +54,7 @@ namespace gng {
     Age  get_maximum_edge_age() { return maximum_age; }
 
     // stop criterion, net size
-    void start(size_t desired_netsize) {
+    void start(size_t desired_netsize, unsigned no_steps) {
       Node* tmp_node;
 
       tmp_node = new Node();
