@@ -2,6 +2,7 @@
 #define GNG_SAM_POINT_HPP
 
 #include <array>
+#include <cmath>
 #include <type_traits>
 #include <initializer_list>
 
@@ -31,8 +32,6 @@ namespace gng::point {
 
     PointN(array<double,N> pos): position(std::move(pos)) {}
 
-    // More point methods if necessary later
-
     double& operator[](size_t dim) {
       if (dim >= N)
         throw std::runtime_error("Dimension differs!");
@@ -45,6 +44,14 @@ namespace gng::point {
         throw std::runtime_error("Dimension differs!");
 
       return position[dim];
+    }
+
+    double norma2() {
+      double sum = 0;
+      for (size_t i = 0; i < N; ++i)
+        sum += position[i] * position[i];
+
+      return sqrt(sum);
     }
 
     size_t get_dimension() { return N; }
