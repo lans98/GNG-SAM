@@ -43,9 +43,9 @@ namespace gng {
     };
 
     // Private fields
-    set<Node*>   nodes;
+    set<Node*>    nodes;
     vector<Edge*> edges;
-    Age          maximum_age;
+    Age           maximum_age;
 
   public:
     GNG() = default;
@@ -72,24 +72,18 @@ namespace gng {
         step_counter += 1;
         PointN<N> signal = gen_random_signal();
         auto nearest = two_nearest_nodes(signal);
-        auto u = nearest.first;
-        auto v = nearest.second;
+        auto v = nearest.first;
+        auto u = nearest.second;
 
-        // increase age of all edges (from kdevelop)
-        //for (auto& edge: edges)
-        //  if (edge.a == u || edge.b == u)
-        //    edge.age += 1;
-
-        for (auto& n : u->relative_edges)
+        for (auto& n : v->relative_edges)
           n->age += 1;
 
-        u->error += pow(u->point.norma2() - signal.point.norma2(), 2);
+        v->error += pow(v->point.norma2() - signal.norma2(), 2);
         // TODO: u->point +=...
         // TODO: foreach ...
 
         // If there isn't a edge between u and v, create one
-        if (u->relatives.find(v) == u->relatives.end()) {
-          Edge* e = new Edge{ .age = 0, .node_a = u, .node_b = v };
+        if (v->relatives.find(u) == v->relatives.end()) {
           u->relatives.insert(v);
           v->relatives.insert(u);
           u->relative_edges.insert(e);
@@ -146,25 +140,28 @@ namespace gng {
 
     double euclidian_distance(const PointN<N>& a, const PointN<N>& b){
       double distance = 0;
-      for(size_t i = 0; i < N; i++)
-        distance += pow(a[i] - b[i]);
+      for(int i = 0; i < N; i++)
+        distance += pow(a[i] - b[i], 2);
       return sqrt(distance);
     }
 
-    pair<Node*, Node*> two_nearest_nodes(const PointN<N>& point) {
-      Node* a, b;
+    auto two_nearest_nodes(PointN<N>& point) {
+      Node* a = new Node();
+      Node* b = new Node();
       double distancea = -1, distanceb = -1;
 
       for (auto& n : nodes){
         if (distancea == -1) {
           distancea = euclidian_distance(n->point, point);
           a = n;
-        } else if (distanceb == -1) {
+        }
+        else if(distanceb == -1) {
           distanceb = euclidian_distance(n->point, point);
           b = n;
-        } else{
+        }
+        else{
           double d = euclidian_distance(n->point, point);
-          if (d < distancea) {
+          if( d < distancea ){
             distancea = d;
             a = n;
           } else if(d < distanceb) {

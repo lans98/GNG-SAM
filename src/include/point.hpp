@@ -65,6 +65,8 @@ namespace point {
 
       return PointN(pos);
     }
+
+    array<double, N> getPosition(){return this->position;}
   };
 
 }
