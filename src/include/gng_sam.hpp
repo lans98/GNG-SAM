@@ -83,7 +83,7 @@ namespace gng {
         for (auto& n : u->relative_edges)
           n->age += 1;
 
-        u->error += pow(u->point.norma2() - signal.norma2(), 2);
+        u->error += pow(u->point.norma2() - signal.point.norma2(), 2);
         // TODO: u->point +=...
         // TODO: foreach ...
 
@@ -92,8 +92,8 @@ namespace gng {
           Edge* e = new Edge{ .age = 0, .node_a = u, .node_b = v };
           u->relatives.insert(v);
           v->relatives.insert(u);
-          u->relative_edges.insert(e);
-          v->relative_edges.insert(e);
+          u->relativeEdges.insert(e);
+          v->relativeEdges.insert(e);
           edges.push_back(e);
         }
 
@@ -101,7 +101,7 @@ namespace gng {
 
         // remove oldest edges
         for (auto it = edges.begin(); it != edges.end(); ++it) {
-          Edge& edge = *(*it); // just an alias
+          Edge& edge = *it; // just an alias
 
           Node* a = edge.a;
           Node* b = edge.b;
@@ -151,7 +151,7 @@ namespace gng {
       return sqrt(distance);
     }
 
-    auto two_nearest_nodes(const PointN<N>& point) {
+    pair<Node*, Node*> two_nearest_nodes(const PointN<N>& point) {
       Node* a, b;
       double distancea = -1, distanceb = -1;
 
