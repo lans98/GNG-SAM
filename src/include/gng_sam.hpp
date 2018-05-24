@@ -2,6 +2,7 @@
 #define GNG_SAM_HPP
 
 // Std dependencies
+#include <set>
 #include <utility>
 #include <vector>
 #include <numeric>
@@ -29,12 +30,16 @@ namespace gng {
     struct Edge {
       Age   age;
       Node* relative;
+
+      bool operator<(const Edge& r) { return relative < r.relative; }
+      bool operator>(const Edge& r) { return relative > r.relative; }
+      bool operator==(const Edge& r) { return relative == r.relative; }
     };
 
     struct Node {
-      double        error;
-      PointN<N>     point;
-      vector<Edge>  relatives;
+      double     error;
+      PointN<N>  point;
+      set<Edge>  relatives;
     };
 
     // Private fields
@@ -56,9 +61,6 @@ namespace gng {
       tmp_node->point = PointN<N>::random_in(MIN_DOUBLE, MAX_DOUBLE);
       nodes.push_back(tmp_node);
 
-      nodes[0]->relatives.push_back(Edge { .age = 0, .relative = nodes[1] });
-      nodes[1]->relatives.push_back(Edge { .age = 0, .relative = nodes[0] });
-
       while (nodes.size() < desired_netsize) {
         PointN<N> signal = gen_random_signal();
         auto nearest = two_nearest_nodes(signal);
@@ -70,6 +72,8 @@ namespace gng {
 
         u->error += pow(u->point.norma2() - signal.point.norma2(), 2);
         // u->point +=
+
+
       }
     }
 
@@ -79,9 +83,11 @@ namespace gng {
       return PointN<N>::random_in(MIN_DOUBLE, MAX_DOUBLE);
     }
 
+    /*
     pair<Node*, Node*> two_nearest_nodes(const PointN<N>& point) {
 
     }
+    */
   };
 
 }
