@@ -65,12 +65,16 @@ namespace gng {
       tmp_node->point = PointN<N>::random_in(MIN_DOUBLE, MAX_DOUBLE);
       nodes.insert(tmp_node);
 
+      unsigned step_counter = 0;
+      unsigned cycle_counter = 0;
       while (nodes.size() < desired_netsize) {
+        step_counter += 1;
         PointN<N> signal = gen_random_signal();
         auto nearest = two_nearest_nodes(signal);
         auto u = nearest.first;
         auto v = nearest.second;
 
+        // increase age of all edges
         for (auto& edge: edges)
           edge.age += 1;
 
@@ -85,7 +89,7 @@ namespace gng {
           edges.insert(Edge{ .age = 0, .node_a = u, .node_b = v });
         }
 
-        // TODO: edge(u,v).age = 0
+        // TODO: set age of edge (u <-> v) to 0
 
         // remove oldest edges
         for (auto it = edges.begin(); it != edges.end(); ++it) {
@@ -94,24 +98,35 @@ namespace gng {
           Node* a = edge.a;
           Node* b = edge.b;
 
-          if (edge.age > maximum_age) {
-            edges.erase(it);
-            
-            // we deleted its last edge
-            if (a->relatives.size() == 1) {
-              auto a_it = nodes.find(a);
-              nodes.erase(a_it);
-              delete a;
-            }
+          // check if edge is young enough
+          if (edge.age <= maximum_age)
+            continue;
 
-            // we deleted its last edge
-            if (b->relatives.size() == 1) {
-              auto b_it = nodes.find(b);
-              nodes.erase(b_it);
-              delete b;
-            }
+          // delete this edge because it's too old
+          edges.erase(it);
+
+          // we deleted its last edge
+          if (a->relatives.size() == 1) {
+            auto a_it = nodes.find(a);
+            nodes.erase(a_it);
+            delete a;
+          }
+
+          // we deleted its last edge
+          if (b->relatives.size() == 1) {
+            auto b_it = nodes.find(b);
+            nodes.erase(b_it);
+            delete b;
           }
         }
+
+        if (step_counter == no_steps) {
+          create_new_node();
+          step_counter = 0;
+          cycle_counter += 1;
+        }
+
+        // TODO: decrease all error by some 'beta' constant
       }
     }
 
@@ -121,11 +136,15 @@ namespace gng {
       return PointN<N>::random_in(MIN_DOUBLE, MAX_DOUBLE);
     }
 
-    /*
+    // TODO: implement
     pair<Node*, Node*> two_nearest_nodes(const PointN<N>& point) {
+      return {nullptr, nullptr};
+    }
+
+    // TODO: implement
+    void create_new_node() {
 
     }
-    */
   };
 
 }
