@@ -69,18 +69,18 @@ namespace gng {
       while (nodes.size() < desired_netsize) {
         PointN<N> signal = gen_random_signal();
         auto nearest = two_nearest_nodes(signal);
-        auto u = nearest.first;
-        auto v = nearest.second;
+        auto v = nearest.first;
+        auto u = nearest.second;
 
-        for (auto& n : u->relativeEdges)
+        for (auto& n : v->relativeEdges)
           n->age += 1;
 
-        u->error += pow(u->point.norma2() - signal.point.norma2(), 2);
+        v->error += pow(v->point.norma2() - signal.norma2(), 2);
         // TODO: u->point +=...
         // TODO: foreach ...
 
         // If there isn't a edge between u and v, create one
-        if (u->relatives.find(v) == u->relatives.end()) {
+        if (v->relatives.find(u) == v->relatives.end()) {
           u->relatives.insert(v);
           v->relatives.insert(u);
           Edge* e = new Edge;
@@ -100,27 +100,28 @@ namespace gng {
       return PointN<N>::random_in(MIN_DOUBLE, MAX_DOUBLE);
     }
 
-    double euclidianDistance(array<double, N> & a, array<double, N> & b){
+    double euclidianDistance(const array<double, N>& a, const array<double, N>& b){
       double distance = 0;
-      for(int i = 0; i < a.get_dimension(); i++)
-        distance += pow(a[i]-b[i]);
+      for(int i = 0; i < N; i++)
+        distance += pow(a[i]-b[i], 2);
       return sqrt(distance);
     }
 
-    pair<Node*, Node*> two_nearest_nodes(const PointN<N>& point) {
-      Node* a, b;
+    pair<Node*, Node*> two_nearest_nodes(PointN<N>& point) {
+      Node* a = new Node();
+      Node* b = new Node();
       double distancea = -1, distanceb = -1;
-      for (auto& n : this.nodes){
+      for (auto& n : this->nodes){
         if(distancea == -1) {
-          distancea = euclidianDistance((n->point).position, point.position);
+          distancea = euclidianDistance((n->point).getPosition(), point.getPosition());
           a = n;
         }
         else if(distanceb == -1) {
-          distanceb = euclidianDistance((n->point).position, point.position);
+          distanceb = euclidianDistance((n->point).getPosition(), point.getPosition());
           b = n;
         }
         else{
-          double d = euclidianDistance((n->point).position, point.position);
+          double d = euclidianDistance((n->point).getPosition(), point.getPosition());
           if( d < distancea ){
             distancea = d;
             a = n;
