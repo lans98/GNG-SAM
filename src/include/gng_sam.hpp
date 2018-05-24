@@ -105,11 +105,6 @@ namespace gng {
 
 
     }
-
-    void reset_visited_marks() {
-      for (auto& n : nodes)
-        n->visited = false;
-    }
   };
 
 }
