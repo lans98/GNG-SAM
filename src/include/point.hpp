@@ -10,6 +10,7 @@
 namespace gng::point {
 
   using namespace std;
+  using namespace gng::random;
 
   template <size_t N>
   class PointN {
@@ -52,7 +53,7 @@ namespace gng::point {
     static PointN random_in(double beg, double end) {
       array<double, N> pos;
       for (size_t i = 0; i < N; ++i)
-        pos[i] = random::random(beg, end);
+        pos[i] = random::random_in(beg, end);
 
       return PointN(pos);
     }
