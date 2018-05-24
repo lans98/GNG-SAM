@@ -5,7 +5,9 @@
 #include <type_traits>
 #include <initializer_list>
 
-namespace gng {
+#include <random.hpp>
+
+namespace gng::point {
 
   using namespace std;
 
@@ -26,8 +28,10 @@ namespace gng {
         position[i] = *it;
     }
 
+    PointN(array<double,N> pos): position(std::move(pos)) {}
+
     // More point methods if necessary later
-    
+
     double& operator[](size_t dim) {
       if (dim >= N)
         throw std::runtime_error("Dimension differs!");
@@ -43,6 +47,15 @@ namespace gng {
     }
 
     size_t get_dimension() { return N; }
+
+    // static methods
+    static PointN random_in(double beg, double end) {
+      array<double, N> pos;
+      for (size_t i = 0; i < N; ++i)
+        pos[i] = random::random(beg, end);
+
+      return PointN(pos);
+    }
   };
 
 }
