@@ -3,7 +3,8 @@
 
 #include <random>
 
-namespace gng::random {
+namespace gng {
+namespace random {
 
   using namespace std;
 
@@ -18,6 +19,7 @@ namespace gng::random {
   // generate a random number in [0,1]
   double random() { return random_in(0.0, 1.0); }
 
+}
 }
 
 #endif

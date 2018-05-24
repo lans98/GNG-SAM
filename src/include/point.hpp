@@ -8,10 +8,11 @@
 
 #include <random.hpp>
 
-namespace gng::point {
+namespace gng {
+namespace point {
 
   using namespace std;
-  using namespace gng::random;
+  using namespace random;
 
   template <size_t N>
   class PointN {
@@ -66,6 +67,7 @@ namespace gng::point {
     }
   };
 
+}
 }
 
 #endif
