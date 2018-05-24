@@ -74,10 +74,10 @@ namespace gng {
         auto nearest = two_nearest_nodes(signal);
         auto u = nearest.first;
         auto v = nearest.second;
-        
+
         // increase age of all edges (from kdevelop)
         //for (auto& edge: edges)
-        //  if (edge.a == u || edge.b == u) 
+        //  if (edge.a == u || edge.b == u)
         //    edge.age += 1;
 
         for (auto& n : u->relative_edges)
@@ -154,8 +154,8 @@ namespace gng {
     pair<Node*, Node*> two_nearest_nodes(const PointN<N>& point) {
       Node* a, b;
       double distancea = -1, distanceb = -1;
-      
-      for (auto& n : this.nodes){
+
+      for (auto& n : nodes){
         if (distancea == -1) {
           distancea = euclidian_distance(n->point, point);
           a = n;
@@ -173,7 +173,7 @@ namespace gng {
           }
         }
       }
-      
+
       return make_pair(a, b);
     }
 
