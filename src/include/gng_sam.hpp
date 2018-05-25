@@ -2,11 +2,10 @@
 #define GNG_SAM_HPP
 
 // Std dependencies
-#include <set>
-#include <queue>
 #include <utility>
 #include <vector>
 #include <numeric>
+#include <algorithm>
 #include <unordered_set>
 #include <iostream>
 #include <algorithm>
@@ -38,7 +37,7 @@ namespace gng {
     };
 
     struct Node {
-      double     error   = 0.0;
+      double     error = 0.0;
       PointN<N>  point;
       unordered_set<Node*> relatives;
       unordered_set<Edge*> relative_edges;
@@ -52,7 +51,7 @@ namespace gng {
 
   public:
     GNG() = default;
-    GNG(double alfa) {
+    GNG(double alfa){
       this->alfa = alfa;
     }
     GNG(const GNG&) = delete;
@@ -61,7 +60,7 @@ namespace gng {
     Age  get_maximum_edge_age() { return maximum_age; }
 
     // stop criterion, net size
-    void start(size_t desired_netsize, unsigned no_steps) {
+    void start(size_t desired_netsize, unsigned no_steps, double beta) {
       Node* tmp_node;
 
       tmp_node = new Node();
@@ -85,8 +84,9 @@ namespace gng {
           n->age += 1;
 
         v->error += pow(v->point.norma2() - signal.norma2(), 2);
-        // TODO: u->point +=...
-        // TODO: foreach ...
+        
+        // TODO: u->point +=... line 10 in paper
+        // TODO: foreach ... line 11 in paper
 
         // If there isn't a edge between u and v, create one
         if (v->relatives.find(u) == v->relatives.end()) {
@@ -98,7 +98,10 @@ namespace gng {
           edges.push_back(e);
         }
 
-        // TODO: set age of edge (u <-> v) to 0
+        // set age of edge (u <-> v) to 0
+        auto  vu_edge_iterator = v->relative_edges.find(u);
+        Edge& vu_edge = *(*vu_edge_iterator);
+        vu_edge.age = 0;
 
         // remove oldest edges
         for (auto it = edges.begin(); it != edges.end(); ++it) {
@@ -135,7 +138,9 @@ namespace gng {
           cycle_counter += 1;
         }
 
-        // TODO: decrease all error by some 'beta' constant
+        // decrease all error by some 'beta' constant
+        for (auto& node : nodes)
+          node.error += beta * node.error;
       }
     }
 
@@ -152,9 +157,9 @@ namespace gng {
       return sqrt(distance);
     }
 
-    auto two_nearest_nodes(PointN<N>& point) {
-      Node* a = new Node();
-      Node* b = new Node();
+    auto two_nearest_nodes(const PointN<N>& point) {
+      Node* a;
+      Node* b;
       double distancea = -1, distanceb = -1;
 
       for (auto& n : nodes){
