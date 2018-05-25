@@ -100,7 +100,8 @@ namespace gng {
         }
 
         // set age of edge (u <-> v) to 0
-        auto vu_edge_it = find_if(v->relative_edges.begin(), v->relative_edges.end(), [&v,&u](auto& edge){
+        auto vu_edge_it = find_if(v->relative_edges.begin(), v->relative_edges.end(),
+        [&u](auto& edge){
           return edge->node_a == u || edge->node_b == u;
         });
 
@@ -154,8 +155,8 @@ namespace gng {
 
   private:
 
-    PointN<N> gen_random_signal() {
-      return PointN<N>::random_in(MIN_DOUBLE, MAX_DOUBLE);
+    PointN<N> gen_random_signal(double beg, double end) {
+      return PointN<N>::random_in(beg, end);
     }
 
     double euclidian_distance(const PointN<N>& a, const PointN<N>& b){
@@ -166,8 +167,8 @@ namespace gng {
     }
 
     auto two_nearest_nodes(const PointN<N>& point) {
-      Node* a;
-      Node* b;
+      Node* a = nullptr;
+      Node* b = nullptr;
       double distancea = -1, distanceb = -1;
 
       for (auto& n : nodes){
