@@ -84,13 +84,10 @@ namespace gng {
 
         v->error += pow(v->point.norma2() - signal.norma2(), 2);
 
-
         double constanteDesconocida = 1;
-        // TODO: v->point +=... line 10 in paper
-        v->point = v->point + ((signal-v->point)*constanteDesconocida);
-        // TODO: foreach ... line 11 in paper
+        v->point = v->point + constanteDesconocida * (signal - v->point);
         for(auto& n: v->relatives){
-          n->point = n->point + ((signal-n->point)*constanteDesconocida);
+          n->point = n->point + constanteDesconocida * (signal - n->point);
         }
 
         // If there isn't a edge between u and v, create one
