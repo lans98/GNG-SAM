@@ -85,10 +85,9 @@ namespace gng {
         v->error += pow(v->point.norma2() - signal.norma2(), 2);
 
         double constanteDesconocida = 1;
-        v->point = v->point + constanteDesconocida * (signal - v->point);
-        for(auto& n: v->relatives){
-          n->point = n->point + constanteDesconocida * (signal - n->point);
-        }
+        v->point = v->point + (signal - v->point) * constanteDesconocida;
+        for(auto& n: v->relatives)
+          n->point = n->point + (signal - n->point) * constanteDesconocida;
 
         // If there isn't a edge between u and v, create one
         if (v->relatives.find(u) == v->relatives.end()) {
