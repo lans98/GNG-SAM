@@ -57,12 +57,18 @@ namespace point {
 
     size_t get_dimension() { return N; }
 
-    PointN<N> sumTwoPointsDividedBy2(PointN<N>& x){
-      array<double,N> pos;
-      for(int i = 0; i < N; i++){
-        pos[i] = (0 + this->position[i] + x.position[i])/2;
-      }
-      return PointN(pos);
+    PointN operator+(const PointN& r) {
+      PointN result;
+      for (size_t i = 0; i < N; ++i)
+        result[i] = (this->position[i] + r.position[i]);
+      return result;
+    }
+
+    PointN operator/(double d) {
+      PointN result;
+      for (size_t i = 0; i < N; ++i)
+        result[i] = this->position[i] / d;
+      return result;
     }
 
     // static methods
@@ -73,8 +79,6 @@ namespace point {
 
       return PointN(pos);
     }
-
-    array<double, N> getPosition(){return this->position;}
   };
 
 }
