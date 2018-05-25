@@ -109,31 +109,35 @@ namespace gng {
 
         // remove oldest edges
         for (auto it = edges.begin(); it != edges.end(); ++it) {
-          Edge& edge = *(*it); // just an alias
+          Edge edge = *it; // just an alias
 
           Node* a = edge.node_a;
           Node* b = edge.node_b;
 
           // check if edge is young enough
-          if (edge.age <= maximum_age)
+          if (edge->age <= maximum_age)
             continue;
 
           // delete this edge because it's too old
           edges.erase(it);
+          a->relative_edges.erase(it);
+          b->relative_edges.erase(it);
+          a->relatives.erase(a->relatives.find(b));
+          b->relatives.erase(b->relatives.find(a));
 
           // we deleted its last edge
-          if (a->relatives.size() == 1) {
-            auto a_it = nodes.find(a);
-            nodes.erase(a_it);
+          if (a->relatives.empty()) {
+            nodes.erase(nodes.find(a));
             delete a;
           }
 
           // we deleted its last edge
-          if (b->relatives.size() == 1) {
-            auto b_it = nodes.find(b);
-            nodes.erase(b_it);
+          if (b->relatives.empty()) {
+            nodes.erase(nodes.find(b));
             delete b;
           }
+
+          delete edge;
         }
 
         if (step_counter == no_steps) {
