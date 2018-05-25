@@ -267,6 +267,8 @@ namespace gng {
       new_node->relative_edges.insert(e1);
       f->relative_edges.insert(e2);
       new_node->relative_edges.insert(e2);
+      new_node->relatives.insert(q);
+      new_node->relatives.insert(f);
       edges.push_back(e1);
       edges.push_back(e2);
       dec_error_by_alpha(q);
