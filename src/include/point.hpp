@@ -5,6 +5,7 @@
 #include <cmath>
 #include <type_traits>
 #include <initializer_list>
+#include <iostream>
 
 #include <random.hpp>
 
@@ -83,6 +84,17 @@ namespace point {
       for (size_t i = 0; i < N; ++i)
         result[i] = this->position[i] / d;
       return result;
+    }
+
+    friend ostream& operator<<(ostream& out, const PointN& point) {
+      if (N == 0) return out;
+
+      out << "[ ";
+      for (size_t i = 0; i < N - 1; ++i)
+        out << point[i] << ", ";
+      out << point[N - 1] << " ]";
+
+      return out;
     }
 
     // static methods
