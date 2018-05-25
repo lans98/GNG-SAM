@@ -7,6 +7,8 @@
 #include <numeric>
 #include <algorithm>
 #include <unordered_set>
+#include <iostream>
+#include <algorithm>
 
 // Crate dependencies
 #include <point.hpp>
@@ -42,12 +44,16 @@ namespace gng {
     };
 
     // Private fields
-    unordered_set<Node*> nodes;
-    vector<Edge*>        edges;
-    Age                  maximum_age;
+    set<Node*>    nodes;
+    vector<Edge*> edges;
+    Age           maximum_age;
+    double        alfa;
 
   public:
     GNG() = default;
+    GNG(double alfa){
+      this->alfa = alfa;
+    }
     GNG(const GNG&) = delete;
 
     void set_maximum_edge_age(Age new_age) { maximum_age = new_age; }
@@ -180,9 +186,74 @@ namespace gng {
       return make_pair(a, b);
     }
 
+    pair<Node*, Node*> findNodeWithMaxErrorAndNeighbor(){
+      double error = -1;
+      Node* nodeWithMaxError = new Node();
+      Node* neighborWithMaxError = new Node();
+      for(auto& n: nodes){
+        if(error <= n->error) {
+          error = n->error;
+          nodeWithMaxError = n;
+        }
+      }
+      error = -1;
+      for(auto& n: nodeWithMaxError->relatives){
+        if(error <= n->error){
+          error = n->error;
+          neighborWithMaxError = n;
+        }
+      }
+      return make_pair(nodeWithMaxError, neighborWithMaxError);
+    }
+
+    void decreaseError(Node* node){
+      node->error = alfa*(node->error);
+    }
+
     // TODO: implement
     void create_new_node() {
+      pair<Node*, Node*> qf = findNodeWithMaxErrorAndNeighbor();
+      Node* newNode = new Node();
+      newNode->point = PointN<N>(((qf.first)->point).sumTwoPointsDividedBy2((qf.second)->point));
+      //buscar arista que conecta ambos nodos en uno de los nodos
+      for(auto&n: (qf.first)->relative_edges){
+        if(n->node_a == qf.second || n->node_b == qf.second){
+          auto it = find(edges.begin(), edges.end(), n);
+          edges.erase(it);
+          ((qf.first)->relative_edges).erase(n);
+          ((qf.second)->relative_edges).erase(n);
+          break;
+        }
+      }
+      
+      for(auto&n: (qf.first)->relatives){
+        if(n == qf.second){
+          ((qf.first)->relatives).erase(qf.second);
+          break;
+        }
+      }
 
+      for(auto&n: (qf.second)->relatives){
+        if(n == qf.first){
+          ((qf.second)->relatives).erase(qf.first);
+          break;
+        }
+      }
+
+      Edge* e1 = new Edge { .age = 0, .node_a = newNode, .node_b = qf.first };
+      Edge* e2 = new Edge { .age = 0, .node_a = newNode, .node_b = qf.second };
+      (qf.first)->relatives.insert(newNode);
+      (qf.second)->relatives.insert(newNode);
+      (qf.first)->relative_edges.insert(e1);
+      (newNode->relative_edges).insert(e1);
+      (qf.second)->relative_edges.insert(e2);
+      (newNode->relative_edges).insert(e2);
+      edges.push_back(e1);
+      edges.push_back(e2);
+      decreaseError(qf.first);
+      decreaseError(qf.second);
+      newNode->error = (((qf.first)->error)+((qf.second)->error))/2;
+      nodes.insert(newNode);
     }
   };
 

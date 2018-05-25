@@ -57,6 +57,14 @@ namespace point {
 
     size_t get_dimension() { return N; }
 
+    PointN<N> sumTwoPointsDividedBy2(PointN<N>& x){
+      array<double,N> pos;
+      for(int i = 0; i < N; i++){
+        pos[i] = (0 + this->position[i] + x.position[i])/2;
+      }
+      return PointN(pos);
+    }
+
     // static methods
     static PointN random_in(double beg, double end) {
       array<double, N> pos;
