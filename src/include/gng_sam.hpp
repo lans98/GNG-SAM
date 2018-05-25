@@ -122,8 +122,8 @@ namespace gng {
 
           // delete this edge because it's too old
           edges.erase(it);
-          a->relative_edges.erase(it);
-          b->relative_edges.erase(it);
+          a->relative_edges.erase(a->relative_edges.find(edge));
+          b->relative_edges.erase(b->relative_edges.find(edge));
           a->relatives.erase(a->relatives.find(b));
           b->relatives.erase(b->relatives.find(a));
 
