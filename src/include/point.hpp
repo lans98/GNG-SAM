@@ -64,6 +64,20 @@ namespace point {
       return result;
     }
 
+    PointN operator-(const PointN& r) {
+      PointN result;
+      for (size_t i = 0; i < N; ++i)
+        result[i] = (this->position[i] - r.position[i]);
+      return result;
+    }
+
+    PointN operator*(double m){
+      PointN result;
+      for (size_t i = 0; i < N; ++i)
+        result[i] = this->position[i] * m;
+      return result;
+    }
+
     PointN operator/(double d) {
       PointN result;
       for (size_t i = 0; i < N; ++i)
