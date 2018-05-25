@@ -75,7 +75,7 @@ namespace gng {
       while (nodes.size() < desired_netsize) {
         step_counter += 1;
 
-        PointN<N> signal = gen_random_signal();
+        PointN<N> signal = gen_random_signal(MIN_DOUBLE, MAX_DOUBLE);
         auto nearest = two_nearest_nodes(signal);
         auto v = nearest.first;
         auto u = nearest.second;
@@ -101,7 +101,8 @@ namespace gng {
         }
 
         // set age of edge (u <-> v) to 0
-        auto vu_edge_it = find_if(v->relative_edges.begin(), v->relative_edges.end(), [&v,&u](auto& edge){
+        auto vu_edge_it = find_if(v->relative_edges.begin(), v->relative_edges.end(),
+        [&u](auto& edge){
           return edge->node_a == u || edge->node_b == u;
         });
 
@@ -110,31 +111,35 @@ namespace gng {
 
         // remove oldest edges
         for (auto it = edges.begin(); it != edges.end(); ++it) {
-          Edge& edge = *(*it); // just an alias
+          Edge edge = *it; // just an alias
 
           Node* a = edge.node_a;
           Node* b = edge.node_b;
 
           // check if edge is young enough
-          if (edge.age <= maximum_age)
+          if (edge->age <= maximum_age)
             continue;
 
           // delete this edge because it's too old
           edges.erase(it);
+          a->relative_edges.erase(it);
+          b->relative_edges.erase(it);
+          a->relatives.erase(a->relatives.find(b));
+          b->relatives.erase(b->relatives.find(a));
 
           // we deleted its last edge
-          if (a->relatives.size() == 1) {
-            auto a_it = nodes.find(a);
-            nodes.erase(a_it);
+          if (a->relatives.empty()) {
+            nodes.erase(nodes.find(a));
             delete a;
           }
 
           // we deleted its last edge
-          if (b->relatives.size() == 1) {
-            auto b_it = nodes.find(b);
-            nodes.erase(b_it);
+          if (b->relatives.empty()) {
+            nodes.erase(nodes.find(b));
             delete b;
           }
+
+          delete edge;
         }
 
         if (step_counter == no_steps) {
@@ -151,8 +156,8 @@ namespace gng {
 
   private:
 
-    PointN<N> gen_random_signal() {
-      return PointN<N>::random_in(MIN_DOUBLE, MAX_DOUBLE);
+    PointN<N> gen_random_signal(double beg, double end) {
+      return PointN<N>::random_in(beg, end);
     }
 
     double euclidian_distance(const PointN<N>& a, const PointN<N>& b){
@@ -163,8 +168,8 @@ namespace gng {
     }
 
     auto two_nearest_nodes(const PointN<N>& point) {
-      Node* a;
-      Node* b;
+      Node* a = nullptr;
+      Node* b = nullptr;
       double distancea = -1, distanceb = -1;
 
       for (auto& n : nodes){

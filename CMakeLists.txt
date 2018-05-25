@@ -11,3 +11,6 @@ set(SOURCES src/main.cpp)
 
 # Executables
 add_executable(gng_sam ${SOURCES})
+
+# Executable test
+add_executable(point_test test/point.cpp)
