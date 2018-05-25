@@ -111,10 +111,10 @@ namespace gng {
 
         // remove oldest edges
         for (auto it = edges.begin(); it != edges.end(); ++it) {
-          Edge edge = *it; // just an alias
+          Edge* edge = *it; // just an alias
 
-          Node* a = edge.node_a;
-          Node* b = edge.node_b;
+          Node* a = edge->node_a;
+          Node* b = edge->node_b;
 
           // check if edge is young enough
           if (edge->age <= maximum_age)
@@ -242,13 +242,13 @@ namespace gng {
         }
       }
 
-      for (auto it = f->relative_edges.begin(); it != f->relative_edges.end(); ++it) { 
-        Edge& edge = *(*it); 
-        if (edge.node_a == q || edge.node_b == q) { 
-          f->relative_edges.erase(it); 
-          break; 
-        } 
-      } 
+      for (auto it = f->relative_edges.begin(); it != f->relative_edges.end(); ++it) {
+        Edge& edge = *(*it);
+        if (edge.node_a == q || edge.node_b == q) {
+          f->relative_edges.erase(it);
+          break;
+        }
+      }
 
       // delete f from q's relatives
       auto fit = q->relatives.find(f);
