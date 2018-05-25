@@ -5,6 +5,6 @@ using namespace std;
 using namespace gng;
 
 int main() {
-  auto growing_neural_gas = make_unique<GNG<2>>();
+  auto growing_neural_gas = make_unique<GNG<2>>(-0.5);
   growing_neural_gas->start(10, 5);
 }
