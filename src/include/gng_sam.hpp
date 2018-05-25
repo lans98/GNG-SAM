@@ -74,7 +74,7 @@ namespace gng {
       while (nodes.size() < desired_netsize) {
         step_counter += 1;
 
-        PointN<N> signal = gen_random_signal();
+        PointN<N> signal = gen_random_signal(MIN_DOUBLE, MAX_DOUBLE);
         auto nearest = two_nearest_nodes(signal);
         auto v = nearest.first;
         auto u = nearest.second;
