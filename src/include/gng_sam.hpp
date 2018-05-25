@@ -21,8 +21,8 @@ namespace gng {
 
   using Age = unsigned long;
 
-  constexpr double MIN_DOUBLE = numeric_limits<double>::min();
-  constexpr double MAX_DOUBLE = numeric_limits<double>::max();
+  constexpr double MIN_DOUBLE = 0;
+  constexpr double MAX_DOUBLE = 1;
 
   template <size_t N>
   class GNG {
@@ -58,7 +58,8 @@ namespace gng {
     Age  get_maximum_edge_age() { return maximum_age; }
 
     // stop criterion, net size
-    void start(size_t desired_netsize, unsigned no_steps, double beta) {
+    void start(size_t desired_netsize, unsigned no_steps, double beta, Age maximum_age) {
+      set_maximum_edge_age(maximum_age);
       Node* tmp_node;
 
       tmp_node = new Node();
@@ -228,15 +229,21 @@ namespace gng {
       // buscar arista que conecta ambos nodos en uno de los nodos
       for (auto it = q->relative_edges.begin(); it != q->relative_edges.end(); ++it) {
         Edge& edge = *(*it);
-
         if (edge.node_a == f || edge.node_b == f) {
           auto edge_it = find(edges.begin(), edges.end(), &edge);
           edges.erase(edge_it);
           q->relative_edges.erase(it);
-          f->relative_edges.erase(it);
           break;
         }
       }
+
+      for (auto it = f->relative_edges.begin(); it != f->relative_edges.end(); ++it) { 
+        Edge& edge = *(*it); 
+        if (edge.node_a == q || edge.node_b == q) { 
+          f->relative_edges.erase(it); 
+          break; 
+        } 
+      } 
 
       // delete f from q's relatives
       auto fit = q->relatives.find(f);
