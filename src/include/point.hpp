@@ -56,7 +56,7 @@ namespace point {
       return sqrt(sum);
     }
 
-    size_t get_dimension() { return N; }
+    size_t getDimension() { return N; }
 
     PointN operator+(const PointN& r) {
       PointN result;
@@ -98,10 +98,10 @@ namespace point {
     }
 
     // static methods
-    static PointN random_in(double beg, double end) {
+    static PointN randomIn(double beg, double end) {
       array<double, N> pos;
       for (size_t i = 0; i < N; ++i)
-        pos[i] = random::random_in(beg, end);
+        pos[i] = random::randomIn(beg, end);
 
       return PointN(pos);
     }
