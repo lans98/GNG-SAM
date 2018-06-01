@@ -8,7 +8,12 @@
 #include <algorithm>
 #include <iostream>
 #include <algorithm>
+#include <sstream>
 #include <unordered_set>
+
+// pcl dependencies
+#include <boost/thread/thread.hpp>
+#include <pcl/visualization/pcl_visualizer.h>
 
 // Crate dependencies
 #include <point.hpp>
@@ -23,6 +28,10 @@ namespace gng {
 
   constexpr double MIN_DOUBLE = 0;
   constexpr double MAX_DOUBLE = 1;
+
+  pcl::PointCloud<pcl::PointXYZ>::Ptr gng_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+  boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("Viewer"));        
+  int i = 0;
 
   template <size_t N>
   class GNG {
@@ -58,101 +67,123 @@ namespace gng {
     Age  getMaximumEdgeAge() { return maximunAge; }
 
     // stop criterion, net size
-    void start(size_t desiredNetsize, unsigned numberSteps, double beta, Age maximunAge) {
-      setMaximumEdgeAge(maximunAge);
-      Node* tmpNode;
+    void start(size_t desired_netsize, unsigned no_steps, double beta, Age maximum_age) {
+    
+      viewer->setBackgroundColor (0, 0, 0);
+      viewer->addPointCloud<pcl::PointXYZ> (gng_cloud, "GNG");
+      viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 5, "GNG");
+      viewer->addCoordinateSystem (1.0);
+      viewer->initCameraParameters ();
 
-      tmpNode = new Node();
-      tmpNode->point = PointN<N>::randomIn(MIN_DOUBLE, MAX_DOUBLE);
-      nodes.insert(tmpNode);
+      set_maximum_edge_age(maximum_age);
+      Node* tmp_node;
 
-      tmpNode = new Node();
-      tmpNode->point = PointN<N>::randomIn(MIN_DOUBLE, MAX_DOUBLE);
-      nodes.insert(tmpNode);
+      tmp_node = new Node();
+      tmp_node->point = PointN<N>::random_in(MIN_DOUBLE, MAX_DOUBLE);
+      nodes.insert(tmp_node);
+    
+      tmp_node = new Node();
+      tmp_node->point = PointN<N>::random_in(MIN_DOUBLE, MAX_DOUBLE);
+      nodes.insert(tmp_node);
+    
+      unsigned step_counter  = 0;
+      unsigned cycle_counter = 0;
+      
+      while(!viewer->wasStopped()){
+        viewer->spinOnce (100, true);
+      //  while (nodes.size() < desired_netsize) {
+          updateCloud();
+          gng_cloud->width = (int) gng_cloud->points.size ();
+          gng_cloud->height = 1;
 
-      unsigned stepCounter  = 0;
-      unsigned cycleCounter = 0;
-      while (nodes.size() < desiredNetsize) {
-        stepCounter += 1;
-
-        PointN<N> signal = genRandomSignal(MIN_DOUBLE, MAX_DOUBLE);
-        auto nearest = twoNearestNodes(signal);
-        auto v = nearest.first;
-        auto u = nearest.second;
-
-        for (auto& n : v->relativeEdges)
-          n->age += 1;
-
-        v->error += pow(v->point.norma2() - signal.norma2(), 2);
-
-        double constanteDesconocida = 0.5;
-        double constanteDesconocidaPequenha = 0.2;
-        v->point = v->point + (signal - v->point) * constanteDesconocida;
-        for(auto& n: v->relatives)
-          n->point = n->point + (signal - n->point) * constanteDesconocidaPequenha;
-
-        // If there isn't a edge between u and v, create one
-        if (v->relatives.find(u) == v->relatives.end()) {
-          Edge* e = new Edge { .age = 0, .nodeA = v, .nodeB = u };
-          v->relatives.insert(u);
-          u->relatives.insert(v);
-          v->relativeEdges.insert(e);
-          u->relativeEdges.insert(e);
-          edges.push_back(e);
-        }
-
-        // set age of edge (u <-> v) to 0
-        auto vuEdgeIt = find_if(v->relativeEdges.begin(), v->relativeEdges.end(),
-        [&u](auto& edge){
-          return edge->nodeA == u || edge->nodeB == u;
-        });
-
-        Edge& vuEdge = *(*vuEdgeIt);
-        vuEdge.age = 0;
-
-        // remove oldest edges
-        for (auto it = edges.begin(); it != edges.end(); ++it) {
-          Edge* edge = *it; // just an alias
-
-          Node* a = edge->nodeA;
-          Node* b = edge->nodeB;
-
-          // check if edge is young enough
-          if (edge->age <= maximunAge)
-            continue;
-
-          // delete this edge because it's too old
-          edges.erase(it);
-          a->relativeEdges.erase(a->relativeEdges.find(edge));
-          b->relativeEdges.erase(b->relativeEdges.find(edge));
-          a->relatives.erase(a->relatives.find(b));
-          b->relatives.erase(b->relatives.find(a));
-
-          // we deleted its last edge
-          if (a->relatives.empty()) {
-            nodes.erase(nodes.find(a));
-            delete a;
+          if(!viewer->updatePointCloud(gng_cloud, "new cloud")){
+              viewer->addPointCloud<pcl::PointXYZ> (gng_cloud, "new cloud");
+              viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "new cloud");
           }
 
-          // we deleted its last edge
-          if (b->relatives.empty()) {
-            nodes.erase(nodes.find(b));
-            delete b;
+          step_counter += 1;
+
+          PointN<N> signal = gen_random_signal(MIN_DOUBLE, MAX_DOUBLE);
+          auto nearest = two_nearest_nodes(signal);
+          auto v = nearest.first;
+          auto u = nearest.second;
+
+          for (auto& n : v->relative_edges)
+            n->age += 1;
+
+          v->error += pow(v->point.norma2() - signal.norma2(), 2);
+
+          double constanteDesconocida = 1;
+          v->point = v->point + (signal - v->point) * constanteDesconocida;
+          for(auto& n: v->relatives)
+            n->point = n->point + (signal - n->point) * constanteDesconocida;
+
+          // If there isn't a edge between u and v, create one
+          if (v->relatives.find(u) == v->relatives.end()) {
+            Edge* e = new Edge { .age = 0, .node_a = v, .node_b = u };
+            v->relatives.insert(u);
+            u->relatives.insert(v);
+            v->relative_edges.insert(e);
+            u->relative_edges.insert(e);
+            edges.push_back(e);
           }
 
-          delete edge;
-        }
+          // set age of edge (u <-> v) to 0
+          auto vu_edge_it = find_if(v->relative_edges.begin(), v->relative_edges.end(),
+          [&u](auto& edge){
+            return edge->node_a == u || edge->node_b == u;
+          });
 
-        if (stepCounter == numberSteps) {
-          createNewNode();
-          stepCounter = 0;
-          cycleCounter += 1;
-        }
+          Edge& vu_edge = *(*vu_edge_it);
+          vu_edge.age = 0;
 
-        // decrease all error by some 'beta' constant
-        for (auto& node : nodes)
-          node->error += beta * node->error;
+          // remove oldest edges
+          for (auto it = edges.begin(); it != edges.end(); ++it) {
+            Edge* edge = *it; // just an alias
+
+            Node* a = edge->node_a;
+            Node* b = edge->node_b;
+
+            // check if edge is young enough
+            if (edge->age <= maximum_age)
+              continue;
+
+            // delete this edge because it's too old
+            edges.erase(it);
+            a->relative_edges.erase(a->relative_edges.find(edge));
+            b->relative_edges.erase(b->relative_edges.find(edge));
+            a->relatives.erase(a->relatives.find(b));
+            b->relatives.erase(b->relatives.find(a));
+
+            // we deleted its last edge
+            if (a->relatives.empty()) {
+              nodes.erase(nodes.find(a));
+              delete a;
+            }
+
+            // we deleted its last edge
+            if (b->relatives.empty()) {
+              nodes.erase(nodes.find(b));
+              delete b;
+            }
+
+            delete edge;
+          }
+
+          if (step_counter == no_steps) {
+            create_new_node();
+            step_counter = 0;
+            cycle_counter += 1;
+          }
+
+          // decrease all error by some 'beta' constant
+          for (auto& node : nodes)
+            node->error += beta * node->error;
+        //}
+        boost::this_thread::sleep (boost::posix_time::microseconds (1000));
+
       }
+
     }
 
   private:
@@ -277,6 +308,43 @@ namespace gng {
       newNode->error = (q->error + f->error)/2;
       nodes.insert(newNode);
     }
+
+    void updateCloud(){
+      gng_cloud->points.clear();
+      viewer->removeAllShapes();
+      for(auto& n: nodes) {
+        addPointToCloud(n);
+      }
+      for (auto it = edges.begin(); it != edges.end(); ++it) {
+            Edge* edge = *it; 
+
+            Node* a = edge->node_a;
+            Node* b = edge->node_b;
+
+            pcl::PointXYZ init = convertToPointXYZ(a);
+            pcl::PointXYZ end = convertToPointXYZ(b);
+
+            std::ostringstream stm;
+            stm<<i;
+            viewer->addLine<pcl::PointXYZ> (init, end, stm.str());
+            i++;
+      }
+      cout<<nodes.size()<<endl;
+    }
+
+    void addPointToCloud(Node * node){
+      pcl::PointXYZ basic_point = convertToPointXYZ(node);
+      gng_cloud->points.push_back(basic_point);
+    }
+
+    pcl::PointXYZ convertToPointXYZ(Node * node){
+      pcl::PointXYZ basic_point;
+      basic_point.x = node->point[0];
+      basic_point.y = node->point[1];
+      basic_point.z = 0;
+      return basic_point;
+    }
+
   };
 
 }
