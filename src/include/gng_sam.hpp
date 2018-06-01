@@ -179,7 +179,7 @@ namespace gng {
         for (auto& node : nodes)
           node->error += beta * node->error;
 
-        boost::this_thread::sleep (boost::posix_time::microseconds (1000));
+        //boost::this_thread::sleep (boost::posix_time::microseconds (1000));
       }
     }
 
@@ -338,13 +338,12 @@ namespace gng {
       pcl::PointXYZ basic_point;
       basic_point.x = node->point[0];
       basic_point.y = node->point[1];
-      if(node.size()==2)
+      if((node->point).getDimension()==2)
         basic_point.z = 0;
-      if(node.size()==3)
+      if((node->point).getDimension()==3)
         basic_point.z = node->point[2];
       else{
-        cout<<"This is greater than 3 dimensions"<<endl;
-        return 1;
+        throw invalid_argument("This is greater than 3 dimensions\n");
       }
       return basic_point;
     }
