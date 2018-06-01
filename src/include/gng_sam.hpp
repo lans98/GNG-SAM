@@ -8,7 +8,12 @@
 #include <algorithm>
 #include <iostream>
 #include <algorithm>
+#include <sstream>
 #include <unordered_set>
+
+// pcl dependencies
+#include <boost/thread/thread.hpp>
+#include <pcl/visualization/pcl_visualizer.h>
 
 // Crate dependencies
 #include <point.hpp>
@@ -23,6 +28,10 @@ namespace gng {
 
   constexpr double MIN_DOUBLE = 0;
   constexpr double MAX_DOUBLE = 1;
+
+  pcl::PointCloud<pcl::PointXYZ>::Ptr gng_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+  boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("Viewer"));        
+  int i = 0;
 
   template <size_t N>
   class GNG {
@@ -59,6 +68,12 @@ namespace gng {
 
     // stop criterion, net size
     void start(size_t desiredNetsize, unsigned numberSteps, double beta, Age maximunAge) {
+      viewer->setBackgroundColor (0, 0, 0);
+      viewer->addPointCloud<pcl::PointXYZ> (gng_cloud, "GNG");
+      viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 5, "GNG");
+      viewer->addCoordinateSystem (1.0);
+      viewer->initCameraParameters ();
+
       setMaximumEdgeAge(maximunAge);
       Node* tmpNode;
 
@@ -72,7 +87,18 @@ namespace gng {
 
       unsigned stepCounter  = 0;
       unsigned cycleCounter = 0;
-      while (nodes.size() < desiredNetsize) {
+      while(!viewer->wasStopped()){
+        viewer->spinOnce (100, true);
+        
+        updateCloud();
+        gng_cloud->width = (int) gng_cloud->points.size ();
+        gng_cloud->height = 1;
+
+        if(!viewer->updatePointCloud(gng_cloud, "new cloud")){
+            viewer->addPointCloud<pcl::PointXYZ> (gng_cloud, "new cloud");
+            viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "new cloud");
+        }
+
         stepCounter += 1;
 
         PointN<N> signal = genRandomSignal(MIN_DOUBLE, MAX_DOUBLE);
@@ -152,6 +178,8 @@ namespace gng {
         // decrease all error by some 'beta' constant
         for (auto& node : nodes)
           node->error += beta * node->error;
+
+        boost::this_thread::sleep (boost::posix_time::microseconds (1000));
       }
     }
 
@@ -277,6 +305,43 @@ namespace gng {
       newNode->error = (q->error + f->error)/2;
       nodes.insert(newNode);
     }
+
+    void updateCloud(){
+      gng_cloud->points.clear();
+      viewer->removeAllShapes();
+      for(auto& n: nodes) {
+        addPointToCloud(n);
+      }
+      for (auto it = edges.begin(); it != edges.end(); ++it) {
+            Edge* edge = *it; 
+
+            Node* a = edge->nodeA;
+            Node* b = edge->nodeB;
+
+            pcl::PointXYZ init = convertToPointXYZ(a);
+            pcl::PointXYZ end = convertToPointXYZ(b);
+
+            std::ostringstream stm;
+            stm<<i;
+            viewer->addLine<pcl::PointXYZ> (init, end, stm.str());
+            i++;
+      }
+      cout<<nodes.size()<<endl;
+    }
+
+    void addPointToCloud(Node * node){
+      pcl::PointXYZ basic_point = convertToPointXYZ(node);
+      gng_cloud->points.push_back(basic_point);
+    }
+
+    pcl::PointXYZ convertToPointXYZ(Node * node){
+      pcl::PointXYZ basic_point;
+      basic_point.x = node->point[0];
+      basic_point.y = node->point[1];
+      basic_point.z = 0;
+      return basic_point;
+    }
+
   };
 
 }
