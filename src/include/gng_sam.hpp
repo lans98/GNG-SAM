@@ -338,7 +338,14 @@ namespace gng {
       pcl::PointXYZ basic_point;
       basic_point.x = node->point[0];
       basic_point.y = node->point[1];
-      basic_point.z = 0;
+      if(node.size()==2)
+        basic_point.z = 0;
+      if(node.size()==3)
+        basic_point.z = node->point[2];
+      else{
+        cout<<"This is greater than 3 dimensions"<<endl;
+        return 1;
+      }
       return basic_point;
     }
 
