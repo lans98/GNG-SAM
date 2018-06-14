@@ -85,7 +85,7 @@ namespace gng {
 
         v->error += pow(v->point.norma2() - signal.norma2(), 2);
 
-        double constanteDesconocida = 1;
+        double constanteDesconocida = 0.5;
         v->point = v->point + (signal - v->point) * constanteDesconocida;
         for(auto& n: v->relatives)
           n->point = n->point + (signal - n->point) * constanteDesconocida;
