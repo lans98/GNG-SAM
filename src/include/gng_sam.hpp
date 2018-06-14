@@ -32,21 +32,21 @@ namespace gng {
 
     struct Edge {
       Age   age = 0;
-      Node* node_a;
-      Node* node_b;
+      Node* nodeA;
+      Node* nodeB;
     };
 
     struct Node {
       double     error = 0.0;
       PointN<N>  point;
       unordered_set<Node*> relatives;
-      unordered_set<Edge*> relative_edges;
+      unordered_set<Edge*> relativeEdges;
     };
 
     // Private fields
     unordered_set<Node*> nodes;
     vector<Edge*>        edges;
-    Age                  maximum_age;
+    Age                  maximunAge;
     double               alfa;
 
   public:
@@ -54,76 +54,77 @@ namespace gng {
     GNG(const GNG&) = delete;
     GNG(double alfa): alfa(alfa) {}
 
-    void set_maximum_edge_age(Age new_age) { maximum_age = new_age; }
-    Age  get_maximum_edge_age() { return maximum_age; }
+    void setMaximumEdgeAge(Age newAge) { maximunAge = newAge; }
+    Age  getMaximumEdgeAge() { return maximunAge; }
 
     // stop criterion, net size
-    void start(size_t desired_netsize, unsigned no_steps, double beta, Age maximum_age) {
-      set_maximum_edge_age(maximum_age);
-      Node* tmp_node;
+    void start(size_t desiredNetsize, unsigned numberSteps, double beta, Age maximunAge) {
+      setMaximumEdgeAge(maximunAge);
+      Node* tmpNode;
 
-      tmp_node = new Node();
-      tmp_node->point = PointN<N>::random_in(MIN_DOUBLE, MAX_DOUBLE);
-      nodes.insert(tmp_node);
+      tmpNode = new Node();
+      tmpNode->point = PointN<N>::randomIn(MIN_DOUBLE, MAX_DOUBLE);
+      nodes.insert(tmpNode);
 
-      tmp_node = new Node();
-      tmp_node->point = PointN<N>::random_in(MIN_DOUBLE, MAX_DOUBLE);
-      nodes.insert(tmp_node);
+      tmpNode = new Node();
+      tmpNode->point = PointN<N>::randomIn(MIN_DOUBLE, MAX_DOUBLE);
+      nodes.insert(tmpNode);
 
-      unsigned step_counter  = 0;
-      unsigned cycle_counter = 0;
-      while (nodes.size() < desired_netsize) {
-        step_counter += 1;
+      unsigned stepCounter  = 0;
+      unsigned cycleCounter = 0;
+      while (nodes.size() < desiredNetsize) {
+        stepCounter += 1;
 
-        PointN<N> signal = gen_random_signal(MIN_DOUBLE, MAX_DOUBLE);
-        auto nearest = two_nearest_nodes(signal);
+        PointN<N> signal = genRandomSignal(MIN_DOUBLE, MAX_DOUBLE);
+        auto nearest = twoNearestNodes(signal);
         auto v = nearest.first;
         auto u = nearest.second;
 
-        for (auto& n : v->relative_edges)
+        for (auto& n : v->relativeEdges)
           n->age += 1;
 
         v->error += pow(v->point.norma2() - signal.norma2(), 2);
 
         double constanteDesconocida = 0.5;
+        double constanteDesconocidaPequenha = 0.2;
         v->point = v->point + (signal - v->point) * constanteDesconocida;
         for(auto& n: v->relatives)
-          n->point = n->point + (signal - n->point) * constanteDesconocida;
+          n->point = n->point + (signal - n->point) * constanteDesconocidaPequenha;
 
         // If there isn't a edge between u and v, create one
         if (v->relatives.find(u) == v->relatives.end()) {
-          Edge* e = new Edge { .age = 0, .node_a = v, .node_b = u };
+          Edge* e = new Edge { .age = 0, .nodeA = v, .nodeB = u };
           v->relatives.insert(u);
           u->relatives.insert(v);
-          v->relative_edges.insert(e);
-          u->relative_edges.insert(e);
+          v->relativeEdges.insert(e);
+          u->relativeEdges.insert(e);
           edges.push_back(e);
         }
 
         // set age of edge (u <-> v) to 0
-        auto vu_edge_it = find_if(v->relative_edges.begin(), v->relative_edges.end(),
+        auto vuEdgeIt = find_if(v->relativeEdges.begin(), v->relativeEdges.end(),
         [&u](auto& edge){
-          return edge->node_a == u || edge->node_b == u;
+          return edge->nodeA == u || edge->nodeB == u;
         });
 
-        Edge& vu_edge = *(*vu_edge_it);
-        vu_edge.age = 0;
+        Edge& vuEdge = *(*vuEdgeIt);
+        vuEdge.age = 0;
 
         // remove oldest edges
         for (auto it = edges.begin(); it != edges.end(); ++it) {
           Edge* edge = *it; // just an alias
 
-          Node* a = edge->node_a;
-          Node* b = edge->node_b;
+          Node* a = edge->nodeA;
+          Node* b = edge->nodeB;
 
           // check if edge is young enough
-          if (edge->age <= maximum_age)
+          if (edge->age <= maximunAge)
             continue;
 
           // delete this edge because it's too old
           edges.erase(it);
-          a->relative_edges.erase(a->relative_edges.find(edge));
-          b->relative_edges.erase(b->relative_edges.find(edge));
+          a->relativeEdges.erase(a->relativeEdges.find(edge));
+          b->relativeEdges.erase(b->relativeEdges.find(edge));
           a->relatives.erase(a->relatives.find(b));
           b->relatives.erase(b->relatives.find(a));
 
@@ -142,10 +143,10 @@ namespace gng {
           delete edge;
         }
 
-        if (step_counter == no_steps) {
-          create_new_node();
-          step_counter = 0;
-          cycle_counter += 1;
+        if (stepCounter == numberSteps) {
+          createNewNode();
+          stepCounter = 0;
+          cycleCounter += 1;
         }
 
         // decrease all error by some 'beta' constant
@@ -156,31 +157,31 @@ namespace gng {
 
   private:
 
-    PointN<N> gen_random_signal(double beg, double end) {
-      return PointN<N>::random_in(beg, end);
+    PointN<N> genRandomSignal(double beg, double end) {
+      return PointN<N>::randomIn(beg, end);
     }
 
-    double euclidian_distance(const PointN<N>& a, const PointN<N>& b){
+    double euclidianDistance(const PointN<N>& a, const PointN<N>& b){
       double distance = 0;
       for(int i = 0; i < N; i++)
         distance += pow(a[i] - b[i], 2);
       return sqrt(distance);
     }
 
-    auto two_nearest_nodes(const PointN<N>& point) {
+    auto twoNearestNodes(const PointN<N>& point) {
       Node* a = nullptr;
       Node* b = nullptr;
       double distancea = -1, distanceb = -1;
 
       for (auto& n : nodes){
         if (distancea == -1) {
-          distancea = euclidian_distance(n->point, point);
+          distancea = euclidianDistance(n->point, point);
           a = n;
         } else if(distanceb == -1) {
-          distanceb = euclidian_distance(n->point, point);
+          distanceb = euclidianDistance(n->point, point);
           b = n;
         } else{
-          double d = euclidian_distance(n->point, point);
+          double d = euclidianDistance(n->point, point);
 
           if (d < distancea) {
             distancea = d;
@@ -195,7 +196,7 @@ namespace gng {
       return make_pair(a, b);
     }
 
-    auto largest_error() {
+    auto largestError() {
       double error = -1;
 
       Node* node_with_max_error;
@@ -219,33 +220,33 @@ namespace gng {
       return make_pair(node_with_max_error, neighbor_with_max_error);
     }
 
-    void dec_error_by_alpha(Node* node) {
+    void decErrorByAlpha(Node* node) {
       node->error = alfa * (node->error);
     }
 
-    void create_new_node() {
-      auto qf = largest_error();
+    void createNewNode() {
+      auto qf = largestError();
       Node* q = qf.first;
       Node* f = qf.second;
 
-      Node* new_node  = new Node();
-      new_node->point = (q->point + f->point) / 2;
+      Node* newNode  = new Node();
+      newNode->point = (q->point + f->point) / 2;
 
       // buscar arista que conecta ambos nodos en uno de los nodos
-      for (auto it = q->relative_edges.begin(); it != q->relative_edges.end(); ++it) {
+      for (auto it = q->relativeEdges.begin(); it != q->relativeEdges.end(); ++it) {
         Edge& edge = *(*it);
-        if (edge.node_a == f || edge.node_b == f) {
+        if (edge.nodeA == f || edge.nodeB == f) {
           auto edge_it = find(edges.begin(), edges.end(), &edge);
           edges.erase(edge_it);
-          q->relative_edges.erase(it);
+          q->relativeEdges.erase(it);
           break;
         }
       }
 
-      for (auto it = f->relative_edges.begin(); it != f->relative_edges.end(); ++it) {
+      for (auto it = f->relativeEdges.begin(); it != f->relativeEdges.end(); ++it) {
         Edge& edge = *(*it);
-        if (edge.node_a == q || edge.node_b == q) {
-          f->relative_edges.erase(it);
+        if (edge.nodeA == q || edge.nodeB == q) {
+          f->relativeEdges.erase(it);
           break;
         }
       }
@@ -258,23 +259,23 @@ namespace gng {
       auto qit = f->relatives.find(q);
       f->relatives.erase(qit);
 
-      Edge* e1 = new Edge { .age = 0, .node_a = new_node, .node_b = q };
-      Edge* e2 = new Edge { .age = 0, .node_a = new_node, .node_b = f };
+      Edge* e1 = new Edge { .age = 0, .nodeA = newNode, .nodeB = q };
+      Edge* e2 = new Edge { .age = 0, .nodeA = newNode, .nodeB = f };
 
-      q->relatives.insert(new_node);
-      f->relatives.insert(new_node);
-      q->relative_edges.insert(e1);
-      new_node->relative_edges.insert(e1);
-      f->relative_edges.insert(e2);
-      new_node->relative_edges.insert(e2);
-      new_node->relatives.insert(q);
-      new_node->relatives.insert(f);
+      q->relatives.insert(newNode);
+      f->relatives.insert(newNode);
+      q->relativeEdges.insert(e1);
+      newNode->relativeEdges.insert(e1);
+      f->relativeEdges.insert(e2);
+      newNode->relativeEdges.insert(e2);
+      newNode->relatives.insert(q);
+      newNode->relatives.insert(f);
       edges.push_back(e1);
       edges.push_back(e2);
-      dec_error_by_alpha(q);
-      dec_error_by_alpha(f);
-      new_node->error = (q->error + f->error)/2;
-      nodes.insert(new_node);
+      decErrorByAlpha(q);
+      decErrorByAlpha(f);
+      newNode->error = (q->error + f->error)/2;
+      nodes.insert(newNode);
     }
   };
 
