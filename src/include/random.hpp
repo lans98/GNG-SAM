@@ -6,18 +6,26 @@
 namespace gng {
 namespace random {
 
-  using namespace std;
+    using namespace std;
 
-  // generate a random number in the closed interval [beg, end]
-  double randomIn(double beg, double end) {
-    random_device rand_dev;
-    mt19937_64 engine(rand_dev());
-    uniform_real_distribution<> distribution(beg, end);
-    return distribution(engine);
-  }
+    // generate a random double in the interval [beg, end] (inclusive)
+    double randomIn(double beg, double end) {
+        static random_device randDev;
+        static mt19937_64    engine(randDev());
+        uniform_real_distribution<> distribution(beg, end);
+        return distribution(engine);
+    }
 
-  // generate a random number in [0,1]
-  double random() { return randomIn(0.0, 1.0); }
+    // generate a random double in [0,1]
+    double random() { return randomIn(0.0, 1.0); }
+
+    // generate a random integer in the interval [beg, end] (inclusive)
+    int randomIn(int beg, int end) {
+        static random_device randDev;
+        static mt19937_64        engine(randDev());
+        uniform_int_distribution<> distribution(beg, end);
+        return distribution(engine);
+    }
 
 }
 }
