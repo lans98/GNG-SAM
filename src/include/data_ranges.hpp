@@ -16,7 +16,7 @@ namespace data_ranges {
     template <size_t N>
     class DataRange {
     public:
-        using BoundFunction = function<bool (PointN<N>)>;
+        using BoundFunction = function<bool (PointN<N>&)>;
 
     private:
         array<double, N> mins;
@@ -25,11 +25,12 @@ namespace data_ranges {
 
     public:
         DataRange() = default;
-        DataRange(array<double, N> mins, array<double, N> maxs): mins(move(mins)), maxs(move(maxs)) {}
-        PointN<N> genRandomSignal() { throw runtime_error("Only 2D or 3D"); }
+        DataRange(const DataRange&) = default;
+        DataRange(array<double, N> mins, array<double, N> maxs, BoundFunction fn): mins(move(mins)), maxs(move(maxs)), checkBound(fn) {}
+        PointN<N> genRandom() { throw runtime_error("Only 2D or 3D"); }
 
-        void setMins(array<double, N> mins) { mins = move(mins); }
-        void setMaxs(array<double, N> maxs) { maxs = move(maxs); }
+        void setMins(array<double, N> mins) { this->mins = move(mins); }
+        void setMaxs(array<double, N> maxs) { this->maxs = move(maxs); }
         void setBoundFunction(const BoundFunction& cbf) { checkBound = cbf; }
 
         double& atMins(size_t index) { return mins[index]; }
@@ -38,7 +39,7 @@ namespace data_ranges {
 
     // Specialization for 2D
     template <>
-    PointN<2> DataRange<2>::genRandomSignal() {
+    PointN<2> DataRange<2>::genRandom() {
         PointN<2> point;
 
         do {
@@ -49,9 +50,9 @@ namespace data_ranges {
         return point;
     }
 
-    // Specialization for  3D
+    // Specialization for 3D
     template <>
-    PointN<3> DataRange<3>::genRandomSignal() {
+    PointN<3> DataRange<3>::genRandom() {
         PointN<3> point;
 
         do {
@@ -62,7 +63,6 @@ namespace data_ranges {
 
         return point;
     }
-
 }
 }
 
