@@ -31,7 +31,7 @@ namespace gng {
     using namespace data_ranges;
  
     // Type aliases
-    using Age               = unsigned long;
+    using Age       = unsigned long;
     using ViewerPtr = shared_ptr<visualization::PCLVisualizer>;
 
     // PCL things
@@ -46,13 +46,13 @@ namespace gng {
         struct Node;
 
         struct Edge {
-            Age     age = 0;
+            Age   age = 0;
             Node* nodeA;
             Node* nodeB;
         };
 
         struct Node {
-            double       error = 0.0;
+            double     error = 0.0;
             PointN<N>  point;
             unordered_set<Node*> relatives;
             unordered_set<Edge*> relativeEdges;
@@ -60,10 +60,10 @@ namespace gng {
 
         // Internal graph
         unordered_set<Node*> nodes;
-        vector<Edge*>                edges;
+        vector<Edge*>        edges;
 
         // Learning rate constants
-        Age      maximumAge;
+        Age    maximumAge;
         double alfa;
 
         // Fields needed to draw
@@ -108,11 +108,11 @@ namespace gng {
             Node* tmpNode;
 
             tmpNode = new Node();
-            tmpNode->point = genRandomSignal();
+            tmpNode->point = genRandom();
             nodes.insert(tmpNode);
 
             tmpNode = new Node();
-            tmpNode->point = genRandomSignal();
+            tmpNode->point = genRandom();
             nodes.insert(tmpNode);
 
             unsigned stepCounter  = 0;
@@ -131,12 +131,12 @@ namespace gng {
 
                 stepCounter += 1;
 
-                PointN<N> signal = genRandomSignal();
+                PointN<N> signal = genRandom();
                 auto nearest = twoNearestNodes(signal);
                 auto v = nearest.first;
                 auto u = nearest.second;
 
-                for (auto& n : v->relativeEdges)
+                for (auto& n : v->relativeEdges) 
                     n->age += 1;
 
                 v->error += pow(v->point.norma2() - signal.norma2(), 2);
@@ -215,11 +215,11 @@ namespace gng {
 
     private:
 
-        PointN<N> genRandomSignal() {
+        PointN<N> genRandom() {
             expect(!dataRanges.empty(), "There is no way to generate random signals");
 
             int choosenRange = randomIn(0, dataRanges.size() - 1);
-            return dataRanges[choosenRange].genRandomSignal();
+            return dataRanges[choosenRange].genRandom();
         }
 
         double euclidianDistance(const PointN<N>& a, const PointN<N>& b){
