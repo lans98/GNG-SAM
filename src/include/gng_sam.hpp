@@ -39,7 +39,7 @@ namespace gng {
     //boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("Viewer"));                
     int i = 0;
 
-    template <size_t N>
+    template <size_t N, class DataRange = ContinousDataRange<N>>
     class GNG {
     private:
         // Related abstractions
