@@ -10,10 +10,8 @@
 #include <algorithm>
 #include <sstream>
 #include <unordered_set>
-
-// pcl dependencies
-#include <boost/thread/thread.hpp>
-#include <pcl/visualization/pcl_visualizer.h>
+#include <fstream>
+#include <cstdlib>
 
 // Crate dependencies
 #include <tools.hpp>
@@ -25,18 +23,13 @@ namespace gng {
 
     // Needed namespaces
     using namespace std;
-    using namespace pcl;
     using namespace point;
     using namespace tools;
     using namespace data_ranges;
  
     // Type aliases
     using Age       = unsigned long;
-    using ViewerPtr = shared_ptr<visualization::PCLVisualizer>;
 
-    // PCL things
-    //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
-    //boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("Viewer"));                
     int i = 0;
 
     template <size_t N>
@@ -67,18 +60,17 @@ namespace gng {
         double alfa;
 
         // Fields needed to draw
-        ViewerPtr                 viewer;
-        PointCloud<PointXYZ>::Ptr cloud;
+        ofstream file;
 
         // Needed to generate random signals
         vector<DataRange<N>> dataRanges;
 
     public:
-        GNG(): cloud(new PointCloud<PointXYZ>) { 
+        /*GNG(): cloud(new PointCloud<PointXYZ>) { 
             static_assert(N == 2 || N == 3, "Only accepted 2D and 3D");
-        }
+        }*/
 
-        GNG(double alfa): cloud(new PointCloud<PointXYZ>), alfa(alfa) {
+        GNG(double alfa): file("points.dat"), alfa(alfa) {
             static_assert(N == 2 || N == 3, "Only accepted 2D and 3D");
         }
 
@@ -112,7 +104,7 @@ namespace gng {
             unsigned stepCounter  = 0;
             unsigned cycleCounter = 0;
             while(nodes.size() <= desiredNetsize){
-                cout<<nodes.size()<<endl;
+                //cout<<nodes.size()<<endl;
                 stepCounter += 1;
 
                 PointN<N> signal = genRandom();
@@ -193,8 +185,20 @@ namespace gng {
                 for (auto& node : nodes)
                     node->error += beta * node->error;
 
-                //boost::this_thread::sleep (boost::posix_time::microseconds (1000));
+                if(cycleCounter%10==0){
+                    for(auto& n: nodes) {
+                        file<<fixed;
+                        for (int i = 0; i < N; i++){
+                            file<<n->point[i]<<"\t";
+                            //cout<<n->point[i]<<" ";
+                        }
+                        file<<'\n';
+                        //cout<<endl;
+                    }
+                   // system("gnuplot -p -e \"plot 'points.dat'\"");
+                }
             }
+
         }
 
     private:
@@ -324,31 +328,6 @@ namespace gng {
             nodes.insert(newNode);
         }
 
-        void addPointToCloud(Node* node){
-            PointXYZ basic_point = convertToPointXYZ(node);
-            cloud->points.push_back(basic_point);
-        }
-
-        PointXYZ convertToPointXYZ(Node* node){
-            PointXYZ basic_point;
-
-            basic_point.x = node->point[0];
-            basic_point.y = node->point[1];
-
-            size_t dim = node->point.getDimension();
-            switch (dim) {
-                case 2:
-                    basic_point.z = 0;
-                    break;
-                case 3:
-                    basic_point.z = node->point[2];
-                    break;
-                default:
-                    throw invalid_argument("Node is greater than 3D");
-            }
-            
-            return basic_point;
-        }
     };
 }
 
