@@ -7,7 +7,7 @@ using namespace gng::random;
 
 void test3D() {
     auto growingNeuralGas = make_unique<GNG<3>>(0.5);
-    DataRange<3> dataRange; 
+    ContinousDataRange<3> dataRange; 
     dataRange.setMins(array<double, 3>({0,0,0}));
     dataRange.setMaxs(array<double, 3>({2,2,2}));
     dataRange.setBoundFunction([](auto p) -> bool { return true; });
@@ -23,7 +23,7 @@ void test3D() {
 
 void test2D() {
     auto gng = make_unique<GNG<2>>(0.2);
-    DataRange<2> dataRange;
+    ContinousDataRange<2> dataRange;
     dataRange.setMins(array<double, 2>({ -1 , -1 }));
     dataRange.setMaxs(array<double, 2>({  1 ,  1 }));
     dataRange.setBoundFunction([](auto& p) -> bool { 
@@ -52,6 +52,6 @@ void test2D() {
 }
 
 int main() {
-    //test2D();
-    test3D();
+    test2D();
+    //test3D();
 }
