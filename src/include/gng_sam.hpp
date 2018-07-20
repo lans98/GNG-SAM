@@ -74,11 +74,11 @@ namespace gng {
         vector<DataRange<N>> dataRanges;
 
     public:
-        GNG(): cloud(new PointCloud<PointXYZ>), viewer(new visualization::PCLVisualizer) { 
+        GNG(): cloud(new PointCloud<PointXYZ>) { 
             static_assert(N == 2 || N == 3, "Only accepted 2D and 3D");
         }
 
-        GNG(double alfa): cloud(new PointCloud<PointXYZ>), viewer(new visualization::PCLVisualizer), alfa(alfa) {
+        GNG(double alfa): cloud(new PointCloud<PointXYZ>), alfa(alfa) {
             static_assert(N == 2 || N == 3, "Only accepted 2D and 3D");
         }
 
@@ -98,12 +98,6 @@ namespace gng {
         void start(size_t desiredNetsize, unsigned numberSteps, double beta, Age maximumAge) {
             expect(!dataRanges.empty(), "There is no way to generate random signals");
 
-            viewer->setBackgroundColor(0, 0, 0);
-            viewer->addPointCloud<PointXYZ>(cloud, "GNG");
-            viewer->setPointCloudRenderingProperties(visualization::PCL_VISUALIZER_POINT_SIZE, 5, "GNG");
-            viewer->addCoordinateSystem(1.0);
-            viewer->initCameraParameters();
-
             setMaximumEdgeAge(maximumAge);
             Node* tmpNode;
 
@@ -117,18 +111,8 @@ namespace gng {
 
             unsigned stepCounter  = 0;
             unsigned cycleCounter = 0;
-            while(!viewer->wasStopped()){
-                viewer->spinOnce(100, true);
-                
-                updateCloud();
-                cloud->width  = cloud->points.size();
-                cloud->height = 1;
-
-                if (!viewer->updatePointCloud(cloud, "new cloud")) {
-                    viewer->addPointCloud<pcl::PointXYZ>(cloud, "new cloud");
-                    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "new cloud");
-                }
-
+            while(nodes.size() <= desiredNetsize){
+                cout<<nodes.size()<<endl;
                 stepCounter += 1;
 
                 PointN<N> signal = genRandom();
@@ -338,26 +322,6 @@ namespace gng {
             decErrorByAlpha(f);
             newNode->error = (q->error + f->error)/2;
             nodes.insert(newNode);
-        }
-
-        void updateCloud(){
-            cloud->points.clear();
-            viewer->removeAllShapes();
-            for(auto& n: nodes)
-                addPointToCloud(n);
-            
-            for (auto it = edges.begin(); it != edges.end(); ++it, ++i) {
-                Edge* edge = *it; 
-
-                Node* a = edge->nodeA;
-                Node* b = edge->nodeB;
-
-                PointXYZ init = convertToPointXYZ(a);
-                PointXYZ end    = convertToPointXYZ(b);
-                viewer->addLine<pcl::PointXYZ> (init, end, to_string(i));
-            }
-
-            cout << nodes.size() << endl;
         }
 
         void addPointToCloud(Node* node){
