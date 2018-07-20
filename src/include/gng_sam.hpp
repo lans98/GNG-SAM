@@ -118,16 +118,21 @@ namespace gng {
             unsigned stepCounter  = 0;
             unsigned cycleCounter = 0;
             while(!viewer->wasStopped()){
-                viewer->spinOnce(100, true);
-                
-                updateCloud();
-                cloud->width  = cloud->points.size();
-                cloud->height = 1;
 
-                if (!viewer->updatePointCloud(cloud, "new cloud")) {
-                    viewer->addPointCloud<pcl::PointXYZ>(cloud, "new cloud");
-                    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "new cloud");
+                if(nodes.size() >= desiredNetsize) return;
+                if(nodes.size()%10 == 0){
+                    viewer->spinOnce(100, true);
+                
+                    updateCloud();
+                    cloud->width  = cloud->points.size();
+                    cloud->height = 1;
+
+                    if (!viewer->updatePointCloud(cloud, "new cloud")) {
+                        viewer->addPointCloud<pcl::PointXYZ>(cloud, "new cloud");
+                        viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "new cloud");
+                    }
                 }
+                
 
                 stepCounter += 1;
 
@@ -136,16 +141,11 @@ namespace gng {
                 auto v = nearest.first;
                 auto u = nearest.second;
 
-                for (auto& n : v->relativeEdges) 
-                    n->age += 1;
-
                 v->error += pow(v->point.norma2() - signal.norma2(), 2);
 
                 double constanteDesconocida = 0.5;
-                double constanteDesconocidaPequenha = 0.2;
+                double constanteDesconocidaPequenha = 0.1;
                 v->point = v->point + (signal - v->point) * constanteDesconocida;
-                for(auto& n: v->relatives)
-                    n->point = n->point + (signal - n->point) * constanteDesconocidaPequenha;
 
                 // If there isn't a edge between u and v, create one
                 if (v->relatives.find(u) == v->relatives.end()) {
@@ -172,13 +172,18 @@ namespace gng {
 
                     Node* a = edge->nodeA;
                     Node* b = edge->nodeB;
+                    if(a == v){
+
+                        b->point = b->point + (signal - b->point) * constanteDesconocidaPequenha;
+                        edge->age += 1;
+                    }
 
                     // check if edge is young enough
                     if (edge->age <= maximumAge)
                         continue;
 
                     // delete this edge because it's too old
-                    edges.erase(it);
+                    it = edges.erase(it);
                     a->relativeEdges.erase(a->relativeEdges.find(edge));
                     b->relativeEdges.erase(b->relativeEdges.find(edge));
                     a->relatives.erase(a->relatives.find(b));
@@ -195,8 +200,8 @@ namespace gng {
                         nodes.erase(nodes.find(b));
                         delete b;
                     }
-
                     delete edge;
+                    
                 }
 
                 if (stepCounter == numberSteps) {
