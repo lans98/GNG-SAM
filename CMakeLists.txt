@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.9)
 project(GNG_SAM)
 
-find_package(PCL 1.8 REQUIRED)
+find_package(PCL 1.7 REQUIRED)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
