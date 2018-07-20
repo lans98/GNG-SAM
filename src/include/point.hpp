@@ -96,7 +96,7 @@ namespace point {
             return out;
         }
 
-        // static methods
+        /** generate a random point in [beg, end] */
         static PointN randomIn(double beg, double end) {
             array<double, N> pos;
             for (size_t i = 0; i < N; ++i)
