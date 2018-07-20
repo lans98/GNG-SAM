@@ -6,7 +6,7 @@ using namespace gng;
 using namespace gng::random;
 
 void test3D() {
-    auto growingNeuralGas = make_unique<GNG<3>>(-0.5);
+    auto growingNeuralGas = make_unique<GNG<3>>(0.5);
     DataRange<3> dataRange; 
     dataRange.setMins(array<double, 3>({0,0,0}));
     dataRange.setMaxs(array<double, 3>({2,2,2}));
@@ -18,7 +18,7 @@ void test3D() {
     dataRange.setBoundFunction([](auto p) -> bool { return true; });
     growingNeuralGas->addDataRange(dataRange);
 
-    growingNeuralGas->start(1000, 5, 0.1, 20);
+    growingNeuralGas->start(1000, 20, 0.9, 8);
 }
 
 void test2D() {
@@ -49,9 +49,10 @@ void test2D() {
     gng->addDataRange(dataRange);
 
 
-    gng->start(1000, 2, 0.9, 200);
+    gng->start(1000, 20, 0.9, 8);
 }
 
 int main() {
-    test2D();
+    //test2D();
+    test3D();
 }

@@ -144,7 +144,7 @@ namespace gng {
                 v->error += pow(v->point.norma2() - signal.norma2(), 2);
 
                 double constanteDesconocida = 0.5;
-                double constanteDesconocidaPequenha = 0.2;
+                double constanteDesconocidaPequenha = 0.1;
                 v->point = v->point + (signal - v->point) * constanteDesconocida;
 
                 // If there isn't a edge between u and v, create one
@@ -175,10 +175,9 @@ namespace gng {
                     if(a == v){
 
                         b->point = b->point + (signal - b->point) * constanteDesconocidaPequenha;
-                        
+                        edge->age += 1;
                     }
 
-                    edge->age += 1;
                     // check if edge is young enough
                     if (edge->age <= maximumAge)
                         continue;
