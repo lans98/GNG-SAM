@@ -48,8 +48,7 @@ void test2D() {
     });
     gng->addDataRange(dataRange);
 
-
-    gng->start(1000, 2, 0.1, 5);
+    gng->start(50, 2, 0.1, 5);
 }
 
 int main() {
