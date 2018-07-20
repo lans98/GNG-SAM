@@ -3,6 +3,7 @@
 
 // std crates
 #include <functional>
+#include <fstream>
 
 // project crates
 #include <point.hpp>
@@ -86,6 +87,17 @@ namespace data_ranges {
 
         void push_point(const PointN<N>& point) {
             point_set.push_back(point);
+        }
+
+        void read_from(const string filename){
+            double x, y;
+            ifstream input_file(filename);
+            while(input_file>>x>>y){
+                PointN<N> point;
+                point_set[0] = x;
+                point_set[1] = y;
+                point_set.push_back(point);
+            }
         }
     };
 
