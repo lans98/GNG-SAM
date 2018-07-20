@@ -71,7 +71,7 @@ namespace gng {
         PointCloud<PointXYZ>::Ptr cloud;
 
         // Needed to generate random signals
-        vector<DataRange<N>> dataRanges;
+        vector<DataRange> dataRanges;
 
     public:
         GNG(): cloud(new PointCloud<PointXYZ>), viewer(new visualization::PCLVisualizer) { 
@@ -90,7 +90,7 @@ namespace gng {
         Age  getMaximumEdgeAge() { return maximumAge; }
 
         // Setup data ranges
-        void addDataRange(const DataRange<N>& dataRange) {
+        void addDataRange(const DataRange& dataRange) {
             dataRanges.push_back(dataRange);
         }
 
