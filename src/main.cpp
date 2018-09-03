@@ -5,7 +5,7 @@ using namespace std;
 using namespace gng;
 using namespace gng::random;
 
-void test3D() {
+void continousTest3D() {
     auto growingNeuralGas = make_unique<GNG<3>>(0.5);
     ContinousDataRange<3> dataRange; 
     dataRange.setMins(array<double, 3>({0,0,0}));
@@ -21,7 +21,7 @@ void test3D() {
     growingNeuralGas->start(1000, 20, 0.9, 8);
 }
 
-void test2D() {
+void continousTest2D() {
     auto gng = make_unique<GNG<2>>(0.2);
     ContinousDataRange<2> dataRange;
     dataRange.setMins(array<double, 2>({ -1 , -1 }));
@@ -51,7 +51,16 @@ void test2D() {
     gng->start(1000, 20, 0.9, 8);
 }
 
+void discreteTest2D() {
+    auto gng = make_unique<GNG<2, DiscreteDataRange<2>>>(0.2);
+    DiscreteDataRange<2> dataRange;
+    dataRange.read_from("puntos.txt");
+    gng->addDataRange(dataRange);
+    gng->start(1000, 20, 0.9, 8);
+}
+
 int main() {
-    test2D();
-    //test3D();
+    discreteTest2D();
+    //continousTest2D();
+    //continousTest3D();
 }
