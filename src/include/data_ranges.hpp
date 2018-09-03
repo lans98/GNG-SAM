@@ -94,8 +94,8 @@ namespace data_ranges {
             ifstream input_file(filename);
             while(input_file>>x>>y){
                 PointN<N> point;
-                point_set[0] = x;
-                point_set[1] = y;
+                point[0] = x;
+                point[1] = y;
                 point_set.push_back(point);
             }
         }
